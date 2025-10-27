@@ -239,22 +239,41 @@ const content = {
 const isProcessing = ref(false);
 const processOrderConfirm = () => {
 
-    if (!basketStore.address) {
-        toast.error("Please select shipping address", {
-            position: master.langDirection === 'rtl' ? "bottom-right" : "bottom-left",
-        });
-        return;
-    }
-    if (props.paymentMethod == null || props.paymentMethod == 'card') {
-        toast.error("Please select payment method", {
-            position: master.langDirection === 'rtl' ? "bottom-right" : "bottom-left",
-        });
-        return;
-    }
-
-    // Validate province selection
+    // Validate province selection instead of address
     if (!props.selectedProvinces || Object.keys(props.selectedProvinces).length === 0) {
-        toast.error('Please select a province');
+        const errorMsg = master.locale === 'ar' ? 'يرجى اختيار المحافظة' : 'Please select a province';
+        toast.error(errorMsg, {
+            position: master.langDirection === 'rtl' ? "bottom-right" : "bottom-left",
+        });
+        return;
+    }
+    
+    // Validate that all shops have selected provinces
+    const shopIds = basketStore.selectedShopIds || [];
+    for (const shopId of shopIds) {
+        if (!props.selectedProvinces[shopId]) {
+            const errorMsg = master.locale === 'ar' ? 'يرجى اختيار المحافظة لجميع المتاجر' : 'Please select province for all shops';
+            toast.error(errorMsg, {
+                position: master.langDirection === 'rtl' ? "bottom-right" : "bottom-left",
+            });
+            return;
+        }
+    }
+    
+    // Validate province area
+    if (!props.provinceArea || props.provinceArea.trim() === '') {
+        const errorMsg = master.locale === 'ar' ? 'يرجى إدخال المنطقة' : 'Please enter area';
+        toast.error(errorMsg, {
+            position: master.langDirection === 'rtl' ? "bottom-right" : "bottom-left",
+        });
+        return;
+    }
+    
+    if (props.paymentMethod == null || props.paymentMethod == 'card') {
+        const errorMsg = master.locale === 'ar' ? 'يرجى اختيار طريقة الدفع' : 'Please select payment method';
+        toast.error(errorMsg, {
+            position: master.langDirection === 'rtl' ? "bottom-right" : "bottom-left",
+        });
         return;
     }
 
@@ -265,6 +284,7 @@ const processOrderConfirm = () => {
             province_name: props.provinceName || '',
             province_area: props.provinceArea || '',
             nearest_landmark: props.nearestLandmark || '',
+            provinces: props.selectedProvinces || {}
         };
 
 

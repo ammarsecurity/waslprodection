@@ -52,6 +52,7 @@
                     :provinceArea="provinceArea"
                     :nearestLandmark="nearestLandmark"
                     @update:nearestLandmark="nearestLandmark = $event"
+                    @update:provinceArea="provinceArea = $event"
                 />
 
                 <div class="mt-6">

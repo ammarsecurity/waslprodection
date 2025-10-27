@@ -2,7 +2,7 @@
     $directory = app()->getLocale() == 'ar' ? 'rtl' : 'ltr';
 @endphp
 <!DOCTYPE html>
-<html lang="en" dir="{{ $directory }}">
+<html lang="{{ session('locale', app()->getLocale()) }}" dir="{{ $directory }}">
 
 <head>
     <meta charset="utf-8">
@@ -158,6 +158,17 @@
                             <button type="button" class="emailBadge">
                                 <img src="{{ asset('assets/icons-admin/search.svg') }}" alt="search"
                                     loading="lazy" />
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Language Toggle -->
+                    <div class="badgeButtonBox me-1 me-md-3">
+                        <div class="notificationIcon" onclick="toggleLanguage()" style="cursor: pointer;" title="{{ session('locale', 'ar') === 'ar' ? 'Switch to English' : 'التحويل للعربية' }}">
+                            <button type="button" class="emailBadge">
+                                <svg style="width: 20px; height: 20px; color: #64748b;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                                </svg>
                             </button>
                         </div>
                     </div>
@@ -931,6 +942,15 @@
 
         connectPusher();
         fetchUnreadMessageCount();
+    </script>
+
+    <script>
+        // Language Toggle Function
+        function toggleLanguage() {
+            const currentLang = document.documentElement.lang;
+            const newLang = currentLang === 'ar' ? 'en' : 'ar';
+            window.location.href = "{{ route('change.language') }}?language=" + newLang;
+        }
     </script>
 
 </body>

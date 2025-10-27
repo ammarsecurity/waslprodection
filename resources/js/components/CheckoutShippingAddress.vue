@@ -56,7 +56,7 @@
 <script setup>
 import { reactive, watch } from 'vue';
 
-const emit = defineEmits(['update:nearestLandmark']);
+const emit = defineEmits(['update:nearestLandmark', 'update:provinceArea']);
 
 const props = defineProps({
     shopProvinces: {
@@ -111,6 +111,20 @@ const validateField = (fieldName) => {
 // Watch for form changes to update nearestLandmark
 watch(() => form.address.nearest_landmark, (newValue) => {
     emit('update:nearestLandmark', newValue);
+});
+
+// Watch for form changes to update provinceArea
+watch(() => form.address.area, (newValue) => {
+    emit('update:provinceArea', newValue);
+});
+
+// Watch for props changes to update form
+watch(() => props.provinceArea, (newValue) => {
+    form.address.area = newValue;
+});
+
+watch(() => props.nearestLandmark, (newValue) => {
+    form.address.nearest_landmark = newValue;
 });
 </script>
 
