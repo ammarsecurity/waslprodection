@@ -1,0 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --primary: #ffffff;
+    --primary-50: #ffffff;
+    --primary-100: #ffffff;
+    --primary-200: #ffffff;
+    --primary-300: #ffffff;
+    --primary-400: #ffffff;
+    --primary-500: #ffffff;
+    --primary-600: #ffffff;
+    --primary-700: #ffffff;
+    --primary-800: #ffffff;
+    --primary-900: #ffffff;
+    --primary-950: #ffffff;
+}
+
+body {
+    font-family: "Cairo", sans-serif;
+}
+
+/* Cairo Font for Toast Notifications - Global */
+.Vue-Toastification__toast,
+.Vue-Toastification__toast-body,
+.Vue-Toastification__toast .Vue-Toastification__toast-content {
+    font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    font-weight: 500;
+}
+
+.Vue-Toastification__toast--success .Vue-Toastification__toast-body {
+    font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    font-weight: 600;
+}
+
+.Vue-Toastification__toast--error .Vue-Toastification__toast-body {
+    font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    font-weight: 600;
+}
+
+.Vue-Toastification__toast--info .Vue-Toastification__toast-body {
+    font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    font-weight: 500;
+}
+
+.Vue-Toastification__toast--warning .Vue-Toastification__toast-body {
+    font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    font-weight: 600;
+}
+
+/* Enhanced Toast Styling - Global */
+.Vue-Toastification__toast {
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+}
+
+.Vue-Toastification__toast-body {
+    padding: 8px 12px !important;
+    text-align: right !important;
+    direction: rtl !important;
+}
+
+/* RTL Support for Toast - Global */
+.Vue-Toastification__toast--rtl {
+    text-align: right !important;
+    direction: rtl !important;
+}
+
+.Vue-Toastification__toast--rtl .Vue-Toastification__toast-body {
+    text-align: right !important;
+    direction: rtl !important;
+}
+
+.main-container {
+    @apply px-4 md:px-8 lg:px-16;
+}
+
+.pagination-container {
+    @apply flex items-center justify-center gap-[10px] flex-wrap;
+}
+
+.paginate-buttons {
+    @apply border text-slate-500 w-8 h-8 sm:w-10 sm:h-10 cursor-pointer rounded-[10px] border-slate-200 justify-center items-center flex hover:bg-primary-100;
+}
+
+.active-page {
+    @apply bg-primary text-white border-primary hover:bg-primary;
+}
+
+.vs__dropdown-toggle {
+    padding: 9px 6px !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 8px !important;
+}
