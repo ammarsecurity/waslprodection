@@ -54,13 +54,6 @@
                 {{ $t('My Profile') }}
             </router-link>
 
-            <router-link to="/manage-address" class="routerLink group"
-                :class="route.name == 'add-new-address' || route.name == 'edit-address' ? 'router-link-active' : ''">
-                <MapPinIcon class="w-5 h-5 md:w-6 md:h-6 hidden group-[&.router-link-active]:block" />
-                <MapPinIconOutline class="w-5 h-5 md:w-6 md:h-6 block group-[&.router-link-active]:hidden" />
-                {{ $t('Manage Address') }}
-            </router-link>
-
             <router-link to="/support-tickets" class="routerLink group">
                 <TicketIcon class="w-5 h-5 md:w-6 md:h-6 hidden group-[&.router-link-active]:block" />
                 <TicketIconOutline class="w-5 h-5 md:w-6 md:h-6 block group-[&.router-link-active]:hidden" />
@@ -92,8 +85,8 @@
 
 <script setup>
 import { useAuth } from '../stores/AuthStore';
-import { Squares2X2Icon, ArchiveBoxIcon, HeartIcon, UserIcon, MapPinIcon, TicketIcon, ShieldCheckIcon, ListBulletIcon, KeyIcon, ChatBubbleLeftEllipsisIcon } from '@heroicons/vue/24/solid';
-import { Squares2X2Icon as Squares2X2IconOutline, HeartIcon as HeartIconOutline, ArchiveBoxIcon as ArchiveBoxIconOutline, UserIcon as UserIconOutline, MapPinIcon as MapPinIconOutline, TicketIcon as TicketIconOutline, ShieldCheckIcon as ShieldCheckIconOutline, ListBulletIcon as ListBulletIconOutline, KeyIcon as KeyIconOutline } from '@heroicons/vue/24/outline';
+import { Squares2X2Icon, ArchiveBoxIcon, HeartIcon, UserIcon, TicketIcon, ShieldCheckIcon, ListBulletIcon, KeyIcon, ChatBubbleLeftEllipsisIcon } from '@heroicons/vue/24/solid';
+import { Squares2X2Icon as Squares2X2IconOutline, HeartIcon as HeartIconOutline, ArchiveBoxIcon as ArchiveBoxIconOutline, UserIcon as UserIconOutline, TicketIcon as TicketIconOutline, ShieldCheckIcon as ShieldCheckIconOutline, ListBulletIcon as ListBulletIconOutline, KeyIcon as KeyIconOutline } from '@heroicons/vue/24/outline';
 
 import { useRoute } from 'vue-router';
 

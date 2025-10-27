@@ -423,8 +423,8 @@
                         <div class="rating-summary">
                             <h3 class="summary-title">{{ $t('Rating Overview') }}</h3>
                             <ReviewRatings 
-                                :reviewRatings="averageRatings?.percentages"
-                                :averageRating="averageRatings?.rating" 
+                                :reviewRatings="averageRatings?.percentages || []"
+                                :averageRating="averageRatings?.rating || 0" 
                                 :totalReview="totalReviews" />
                         </div>
 
@@ -433,7 +433,7 @@
                             <h3 class="reviews-title">{{ $t('Customer Reviews') }}</h3>
                             
                             <div v-if="!isLoadingReviews" class="reviews-container">
-                                <div v-for="review in reviews" :key="review.id" class="review-item">
+                                <div v-for="review in (reviews || [])" :key="review.id" class="review-item">
                                     <Review :review="review" />
                                 </div>
                             </div>
@@ -448,12 +448,12 @@
                                 </div>
                             </div>
 
-                            <div v-if="reviews.length === 0 && !isLoadingReviews" class="no-reviews">
+                            <div v-if="reviews && reviews.length === 0 && !isLoadingReviews" class="no-reviews">
                                 <p>{{ $t('No reviews yet') }}</p>
                             </div>
 
                             <!-- Reviews Pagination -->
-                            <div v-if="reviews.length > 0 && !isLoadingReviews" class="pagination-wrapper">
+                            <div v-if="reviews && reviews.length > 0 && !isLoadingReviews" class="pagination-wrapper">
                                 <div class="pagination-info">
                                     {{ $t('Showing') }} {{ (reviewPerPage * (reviewPage - 1) + 1) }} - 
                                     {{ Math.min(reviewPerPage * reviewPage, totalReviews) }} 
@@ -561,6 +561,11 @@ const products = ref([]);
 const totalProducts = ref(0);
 const newProducts = ref([]);
 const discountedProducts = ref([]);
+
+// Reviews variables
+const reviews = ref([]);
+const totalReviews = ref(0);
+const averageRatings = ref(null);
 
 const search = ref(null);
 const showSidebar = ref(false);
@@ -862,20 +867,26 @@ const showChat = async () => {
 /* Modern Shop Details Styles */
 .shop-details-wrapper {
     min-height: 100vh;
-    background: linear-gradient(to bottom, #ffffff, #f9fafb);
+    background: #fafafa;
 }
 
 /* Hero Banner Section */
 .hero-section {
     position: relative;
     width: 100%;
-    height: 280px;
+    height: 250px;
     overflow: hidden;
 }
 
 @media (min-width: 768px) {
     .hero-section {
-        height: 320px;
+        height: 300px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .hero-section {
+        height: 350px;
     }
 }
 
@@ -896,12 +907,11 @@ const showChat = async () => {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transform: scale(1.05);
-    transition: transform 0.8s ease;
+    transition: transform 0.3s ease;
 }
 
 .banner-wrapper:hover .banner-image {
-    transform: scale(1.1);
+    transform: scale(1.02);
 }
 
 .banner-overlay {
@@ -909,58 +919,22 @@ const showChat = async () => {
     inset: 0;
     background: linear-gradient(
         to bottom,
-        transparent 0%,
-        rgba(0, 0, 0, 0.1) 50%,
-        rgba(0, 0, 0, 0.3) 100%
+        transparent 60%,
+        rgba(0, 0, 0, 0.15) 100%
     );
     pointer-events: none;
 }
 
 .banner-particles {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    pointer-events: none;
-}
-
-.banner-particles .particle {
-    position: absolute;
-    width: 4px;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    animation: floatParticle 10s infinite;
-}
-
-.particle:nth-child(1) { left: 10%; animation-delay: 0s; }
-.particle:nth-child(2) { left: 30%; animation-delay: 2s; }
-.particle:nth-child(3) { left: 50%; animation-delay: 4s; }
-.particle:nth-child(4) { left: 70%; animation-delay: 6s; }
-.particle:nth-child(5) { left: 90%; animation-delay: 8s; }
-
-@keyframes floatParticle {
-    0% {
-        transform: translateY(100vh) rotate(0deg);
-        opacity: 0;
-    }
-    10% {
-        opacity: 1;
-    }
-    90% {
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(-100vh) rotate(720deg);
-        opacity: 0;
-    }
+    display: none;
 }
 
 /* Shop Info Section */
 .shop-info-section {
     position: relative;
-    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.02), rgba(var(--primary-rgb), 0.05));
-    padding: 3rem 0 2rem;
-    margin-top: -80px;
+    background: white;
+    padding: 2rem 0;
+    margin-top: -60px;
 }
 
 .shop-card-wrapper {
@@ -970,34 +944,24 @@ const showChat = async () => {
 
 .shop-card {
     background: white;
-    border-radius: 24px;
-    padding: 2rem;
+    border-radius: 16px;
+    padding: 1.5rem;
     box-shadow: 
-        0 20px 60px rgba(0, 0, 0, 0.08),
-        0 10px 30px rgba(0, 0, 0, 0.05),
-        inset 0 1px 3px rgba(255, 255, 255, 0.5);
+        0 4px 12px rgba(0, 0, 0, 0.06),
+        0 2px 6px rgba(0, 0, 0, 0.04);
     position: relative;
     overflow: hidden;
+    border: 1px solid #f0f0f0;
+}
+
+@media (min-width: 768px) {
+    .shop-card {
+        padding: 2rem;
+    }
 }
 
 .card-glow {
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(
-        circle at center,
-        rgba(var(--primary-rgb), 0.05),
-        transparent 70%
-    );
-    animation: rotate 20s linear infinite;
-    pointer-events: none;
-}
-
-@keyframes rotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    display: none;
 }
 
 /* Shop Header */
@@ -1034,65 +998,39 @@ const showChat = async () => {
 .logo-wrapper {
     position: relative;
     flex-shrink: 0;
-    width: 70px;
-    height: 70px;
+    width: 80px;
+    height: 80px;
 }
 
 @media (min-width: 768px) {
     .logo-wrapper {
-        width: 88px;
-        height: 88px;
+        width: 100px;
+        height: 100px;
     }
 }
 
 .logo-ring {
-    position: absolute;
-    inset: -3px;
-    border-radius: 50%;
-    background: linear-gradient(45deg, 
-        rgba(var(--primary-rgb), 0.3),
-        rgba(var(--primary-rgb), 0.1),
-        rgba(var(--primary-rgb), 0.3)
-    );
-    animation: rotateGradient 3s linear infinite;
-}
-
-@media (min-width: 768px) {
-    .logo-ring {
-        inset: -4px;
-    }
-}
-
-@keyframes rotateGradient {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    display: none;
 }
 
 .shop-logo {
     width: 100%;
     height: 100%;
-    border-radius: 40%;
+    border-radius: 12px;
     object-fit: cover;
     position: relative;
     z-index: 2;
     border: 3px solid white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-@media (min-width: 768px) {
-    .shop-logo {
-        border: 4px solid white;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    }
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .logo-badge {
     position: absolute;
-    bottom: -2px;
-    right: -2px;
-    width: 22px;
-    height: 22px;
-    background: linear-gradient(135deg, #10b981, #059669);
+    bottom: -4px;
+    right: -4px;
+    width: 24px;
+    height: 24px;
+    background: #10b981;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -1104,8 +1042,6 @@ const showChat = async () => {
 
 @media (min-width: 768px) {
     .logo-badge {
-        bottom: 0;
-        right: 0;
         width: 28px;
         height: 28px;
         border: 3px solid white;
@@ -1142,27 +1078,21 @@ const showChat = async () => {
 }
 
 .shop-name {
-    font-size: 1.25rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, 
-        #1f2937,
-        #374151
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1.2;
-}
-
-@media (min-width: 480px) {
-    .shop-name {
-        font-size: 1.0rem;
-    }
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.3;
 }
 
 @media (min-width: 768px) {
     .shop-name {
         font-size: 1.75rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .shop-name {
+        font-size: 2rem;
     }
 }
 
@@ -1269,31 +1199,15 @@ const showChat = async () => {
 
 .shop-description {
     color: #6b7280;
-    font-size: 0.8125rem;
-    line-height: 1.5;
+    font-size: 14px;
+    line-height: 1.6;
     max-width: 100%;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-@media (min-width: 480px) {
-    .shop-description {
-        font-size: 0.875rem;
-        -webkit-line-clamp: 3;
-        line-clamp: 3;
-    }
 }
 
 @media (min-width: 768px) {
     .shop-description {
-        font-size: 0.9375rem;
-        line-height: 1.6;
-        max-width: 600px;
-        -webkit-line-clamp: unset;
-        line-clamp: unset;
+        font-size: 15px;
+        max-width: 700px;
     }
 }
 
@@ -1412,73 +1326,63 @@ const showChat = async () => {
 /* Chat Button */
 .chat-button {
     position: relative;
-    padding: 0.875rem 1.25rem;
-    border-radius: 14px;
-    background: white;
-    border: 2px solid rgba(var(--primary-rgb), 0.1);
+    padding: 12px 20px;
+    border-radius: 10px;
+    background: #3b82f6;
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.625rem;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    gap: 8px;
+    transition: all 0.2s ease;
     overflow: hidden;
     width: 100%;
     cursor: pointer;
+    color: white;
+    font-weight: 600;
 }
 
 @media (min-width: 768px) {
     .chat-button {
-        padding: 1rem 1.5rem;
-        border-radius: 16px;
-        gap: 0.75rem;
         width: auto;
+        min-width: 160px;
     }
 }
 
 .chat-bg {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, 
-        rgba(var(--primary-rgb), 0.05),
-        rgba(var(--primary-rgb), 0.1)
-    );
-    transform: scale(0);
-    transition: transform 0.3s ease;
-}
-
-.chat-button:hover .chat-bg {
-    transform: scale(1);
+    display: none;
 }
 
 .chat-content {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
     z-index: 2;
 }
 
 .chat-icon-wrapper {
     position: relative;
-    color: rgb(var(--primary-rgb));
+    color: white;
+    display: flex;
+    align-items: center;
 }
 
 .chat-pulse {
-    position: absolute;
-    inset: -8px;
-    border: 2px solid rgba(var(--primary-rgb), 0.3);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
+    display: none;
 }
 
 .chat-text {
     font-weight: 600;
-    color: rgb(var(--primary-rgb));
+    color: white;
 }
 
 .chat-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(var(--primary-rgb), 0.15);
+    background: #2563eb;
+}
+
+.chat-button:active {
+    background: #1d4ed8;
 }
 
 /* Navigation Tabs - Mobile Optimized */
@@ -1519,18 +1423,18 @@ const showChat = async () => {
 .tab-button {
     position: relative;
     flex: 1;
-    padding: 0.625rem 0.875rem;
-    border-radius: 10px;
-    background: transparent;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: #f3f4f6;
     border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.375rem;
+    gap: 6px;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 14px;
     color: #6b7280;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     overflow: hidden;
     cursor: pointer;
 }
@@ -1538,10 +1442,9 @@ const showChat = async () => {
 @media (min-width: 768px) {
     .tab-button {
         flex: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 12px;
-        gap: 0.5rem;
-        font-size: 1rem;
+        padding: 12px 24px;
+        gap: 8px;
+        font-size: 15px;
     }
 }
 
@@ -1551,33 +1454,16 @@ const showChat = async () => {
 }
 
 .tab-indicator {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, 
-        rgb(var(--primary-rgb)),
-        rgba(var(--primary-rgb), 0.7)
-    );
-    transform: scaleX(0);
-    transition: transform 0.3s ease;
+    display: none;
 }
 
 .tab-button.active {
-    background: linear-gradient(135deg, 
-        rgba(var(--primary-rgb), 0.05),
-        rgba(var(--primary-rgb), 0.1)
-    );
-    color: rgb(var(--primary-rgb));
-}
-
-.tab-button.active .tab-indicator {
-    transform: scaleX(1);
+    background: #3b82f6;
+    color: white;
 }
 
 .tab-button:hover:not(.active) {
-    background: rgba(0, 0, 0, 0.02);
+    background: #e5e7eb;
 }
 
 /* Search Bar */
@@ -1592,19 +1478,18 @@ const showChat = async () => {
 
 .search-input {
     width: 100%;
-    padding: 0.875rem 3rem 0.875rem 1.25rem;
-    background: #f9fafb;
-    border: 2px solid transparent;
-    border-radius: 14px;
-    font-size: 0.9375rem;
-    transition: all 0.3s ease;
+    padding: 12px 48px 12px 16px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 14px;
+    transition: all 0.2s ease;
     outline: none;
 }
 
 .search-input:focus {
-    background: white;
-    border-color: rgba(var(--primary-rgb), 0.2);
-    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.08);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .search-icon {
@@ -1617,22 +1502,7 @@ const showChat = async () => {
 }
 
 .search-glow {
-    position: absolute;
-    inset: -2px;
-    border-radius: 16px;
-    background: linear-gradient(45deg,
-        rgba(var(--primary-rgb), 0.2),
-        transparent,
-        rgba(var(--primary-rgb), 0.2)
-    );
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-}
-
-.search-input:focus ~ .search-glow {
-    opacity: 1;
-    animation: glowRotate 3s linear infinite;
+    display: none;
 }
 
 /* Categories Section */
@@ -1755,22 +1625,21 @@ const showChat = async () => {
 
 .category-item {
     position: relative;
-    padding: 1rem;
+    padding: 14px;
     background: white;
-    border: 2px solid #e5e7eb;
-    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.2s ease;
     overflow: hidden;
     flex-shrink: 0;
-    width: 120px;
-    min-height: 120px;
+    width: 110px;
+    min-height: 110px;
 }
 
 .category-item:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-    border-color: rgba(var(--primary-rgb), 0.3);
+    border-color: #3b82f6;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .category-content {
@@ -1830,31 +1699,16 @@ const showChat = async () => {
 }
 
 .category-indicator {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 3px;
-    background: linear-gradient(90deg, 
-        rgb(var(--primary-rgb)),
-        rgba(var(--primary-rgb), 0.7)
-    );
-    border-radius: 2px;
-    transition: width 0.3s ease;
+    display: none;
 }
 
 .category-item.active {
-    border-color: rgb(var(--primary-rgb));
-    background: rgba(var(--primary-rgb), 0.02);
-}
-
-.category-item.active .category-indicator {
-    width: 100%;
+    border-color: #3b82f6;
+    background: #eff6ff;
 }
 
 .category-item.active .category-name {
-    color: rgb(var(--primary-rgb));
+    color: #3b82f6;
 }
 
 /* Subcategories */
@@ -1933,34 +1787,30 @@ const showChat = async () => {
 .subcategory-item {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
+    gap: 8px;
+    padding: 10px 16px;
     background: white;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 20px;
-    font-size: 0.875rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
     font-weight: 500;
     color: #6b7280;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     white-space: nowrap;
     flex-shrink: 0;
-    min-width: 120px;
+    min-width: 100px;
 }
 
 .subcategory-item:hover {
-    background: rgba(var(--primary-rgb), 0.05);
-    border-color: rgba(var(--primary-rgb), 0.2);
-    transform: translateY(-2px);
+    background: #f3f4f6;
+    border-color: #d1d5db;
 }
 
 .subcategory-item.active {
-    background: linear-gradient(135deg,
-        rgba(var(--primary-rgb), 0.1),
-        rgba(var(--primary-rgb), 0.05)
-    );
-    border-color: rgba(var(--primary-rgb), 0.3);
-    color: rgb(var(--primary-rgb));
+    background: #eff6ff;
+    border-color: #3b82f6;
+    color: #3b82f6;
 }
 
 .subcategory-content {
@@ -2047,7 +1897,7 @@ const showChat = async () => {
 
 /* Banners Section */
 .banners-section {
-    margin-top: 2rem;
+    margin-top: 1.5rem;
 }
 
 .banners-swiper {
@@ -2056,37 +1906,25 @@ const showChat = async () => {
 
 .banner-card {
     position: relative;
-    border-radius: 20px;
+    border-radius: 12px;
     overflow: hidden;
     aspect-ratio: 3/1;
+    border: 1px solid #f0f0f0;
 }
 
 .banner-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.5s ease;
+    transition: transform 0.3s ease;
 }
 
 .banner-card:hover .banner-img {
-    transform: scale(1.05);
+    transform: scale(1.02);
 }
 
 .banner-shine {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        105deg,
-        transparent 40%,
-        rgba(255, 255, 255, 0.3) 50%,
-        transparent 60%
-    );
-    transform: translateX(-100%);
-    transition: transform 0.8s ease;
-}
-
-.banner-card:hover .banner-shine {
-    transform: translateX(100%);
+    display: none;
 }
 
 /* Content Section */
@@ -2104,23 +1942,21 @@ const showChat = async () => {
 }
 
 .products-section-title {
-    font-size: 1.5rem;
+    font-size: 1.375rem;
     font-weight: 700;
     color: #1f2937;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 2rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 2px solid #f3f4f6;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 @media (min-width: 768px) {
     .products-section-title {
-        font-size: 1.75rem;
-        gap: 1rem;
-        margin-bottom: 2.5rem;
-        padding-bottom: 1rem;
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
     }
 }
 
@@ -2128,28 +1964,27 @@ const showChat = async () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.1), rgba(var(--primary-rgb), 0.05));
-    color: rgb(var(--primary-rgb));
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #3b82f6;
 }
 
 @media (min-width: 768px) {
     .products-section-title .title-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: 14px;
+        width: 40px;
+        height: 40px;
     }
 }
 
 .products-section-title .discount-icon {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+    background: #fef2f2;
     color: #ef4444;
 }
 
 .products-section-title .all-products-icon {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+    background: #f0fdf4;
     color: #10b981;
 }
 

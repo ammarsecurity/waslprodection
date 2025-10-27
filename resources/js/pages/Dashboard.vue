@@ -72,10 +72,6 @@
             </div>
 
             <div class="col-span-1 xl:col-span-1 flex flex-col gap-4">
-                <div>
-                    <DashboardDefaultShippingAddress />
-                </div>
-
                 <div class="grow">
                     <DashboardRecentlyView />
                 </div>
@@ -89,7 +85,6 @@
 import { HeartIcon } from '@heroicons/vue/24/outline';
 import { onMounted, ref } from 'vue';
 import AuthPageHeader from '../components/AuthPageHeader.vue';
-import DashboardDefaultShippingAddress from '../components/DashboardDefaultShippingAddress.vue';
 import DashboardMyCart from '../components/DashboardMyCart.vue';
 import DashboardRecentlyView from '../components/DashboardRecentlyView.vue';
 import BagIcon from '../icons/Bag.vue';
