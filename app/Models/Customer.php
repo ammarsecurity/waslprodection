@@ -53,4 +53,26 @@ class Customer extends Model
     {
         return $this->hasMany(Cart::class);
     }
+
+    /**
+     * Get the shops where this customer is an agent.
+     */
+    public function agentShops(): BelongsToMany
+    {
+        return $this->belongsToMany(Shop::class, 'shop_agents', 'customer_id', 'shop_id')
+            ->withPivot('is_active')
+            ->withTimestamps()
+            ->wherePivot('is_active', true);
+    }
+
+    /**
+     * Check if this customer is an agent for a specific shop.
+     *
+     * @param int $shopId The shop ID
+     * @return bool True if the customer is an agent for the shop
+     */
+    public function isAgentFor(int $shopId): bool
+    {
+        return $this->agentShops()->where('shops.id', $shopId)->exists();
+    }
 }

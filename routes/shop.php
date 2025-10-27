@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\ChatController;
+use App\Http\Controllers\Shop\AgentController;
 use App\Http\Controllers\Shop\Auth\LoginController;
 use App\Http\Controllers\Shop\BannerController;
 use App\Http\Controllers\Shop\BrandController;
@@ -142,6 +143,15 @@ Route::name('shop.')->group(function () {
             Route::put('/unit/{unit}/update', 'update')->name('unit.update');
             Route::delete('/unit/{unit}/destroy', 'destroy')->name('unit.destroy');
             Route::get('/unit/{unit}/toggle', 'statusToggle')->name('unit.toggle');
+        });
+
+        // Agents
+        Route::controller(AgentController::class)->group(function () {
+            Route::get('/agents', 'index')->name('agents.index');
+            Route::get('/agents/create', 'create')->name('agents.create');
+            Route::post('/agents/store', 'store')->name('agents.store');
+            Route::post('/agents/{agent}/toggle-status', 'toggleStatus')->name('agents.toggle-status');
+            Route::delete('/agents/{agent}/destroy', 'destroy')->name('agents.destroy');
         });
 
         // Products

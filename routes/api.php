@@ -149,6 +149,17 @@ Route::controller(BlogController::class)->group(function () {
 // auth middleware route
 Route::middleware(['auth:sanctum', 'role:customer'])->group(function () {
 
+    // Get current user data
+    Route::get('/user', function() {
+        $user = auth()->user();
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'user' => new \App\Http\Resources\UserResource($user)
+            ]
+        ]);
+    });
+
     // user route
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::controller(UserController::class)->group(function () {
@@ -178,6 +189,7 @@ Route::middleware(['auth:sanctum', 'role:customer'])->group(function () {
         Route::post('/place-order/again', 'reOrder');
         Route::get('/order-payment/{order}/{paymentMethod?}', 'payment');
     });
+
 
     // order route for version 1
     Route::controller(OrderController::class)->prefix('/v1')->group(function () {

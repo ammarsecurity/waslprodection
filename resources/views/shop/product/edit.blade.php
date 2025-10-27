@@ -213,6 +213,12 @@
                             </div>
 
                             <div class="col-lg-3 col-md-6 mt-3 mt-lg-0">
+                                <x-input type="text" name="agent_price" label="{{ __('Agent Price') }} ({{ __('Optional') }})"
+                                    placeholder="{{ __('Agent Price') }}" onlyNumber="true" :value="$product->getAgentPrice($product->shop_id)" />
+                                <small class="text-muted">{{ __('Special price for wholesale agents') }}</small>
+                            </div>
+
+                            <div class="col-lg-3 col-md-6 mt-3 mt-lg-0">
                                 <x-input type="text" name="quantity" label="Current Stock Quantity"
                                     placeholder="Current Stock Quantity" onlyNumber="true" :value="$product->quantity" />
                             </div>

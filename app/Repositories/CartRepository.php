@@ -23,6 +23,16 @@ class CartRepository extends Repository
         $shopWiseProducts = collect([]);
         $info = null;
 
+        // Check if user is an agent for any shops
+        $user = auth()->user();
+        $isAgent = false;
+        $agentShops = [];
+        if ($user && $user->customer) {
+            // Eager load the relationship
+            $user->customer->load('agentShops');
+            $agentShops = $user->customer->agentShops->pluck('id')->toArray();
+        }
+
         foreach ($groupCart as $key => $products) {
             $productArray = collect([]);
 
@@ -38,7 +48,22 @@ class CartRepository extends Repository
 
                 $totalItems++;
 
-                $discountPercentage = $product->getDiscountPercentage($product->price, $product->discount_price);
+                // Check if user is an agent for this shop
+                $isAgentForShop = in_array($product->shop_id, $agentShops);
+                $basePrice = $product->price;
+                $baseDiscountPrice = $product->discount_price;
+                
+                // If user is an agent, use agent price
+                if ($isAgentForShop) {
+                    $agentPrice = $product->getAgentPrice($product->shop_id);
+                    
+                    if ($agentPrice) {
+                        $basePrice = $agentPrice;
+                        $baseDiscountPrice = 0; // No discount for agent prices
+                    }
+                }
+
+                $discountPercentage = $product->getDiscountPercentage($basePrice, $baseDiscountPrice);
 
                 $totalSold = $product->orders->sum('pivot.quantity');
 
@@ -46,7 +71,7 @@ class CartRepository extends Repository
                 $flashSaleProduct = null;
                 $quantity = null;
 
-                if ($flashSale) {
+                if ($flashSale && !$isAgentForShop) { // Flash sales don't apply to agents
                     $flashSaleProduct = $flashSale?->products()->where('id', $product->id)->first();
 
                     $quantity = $flashSaleProduct?->pivot->quantity - $flashSaleProduct->pivot->sale_quantity;
@@ -66,12 +91,12 @@ class CartRepository extends Repository
                 $colorPrice = $color?->pivot?->price ?? 0;
                 $extraPrice = $sizePrice + $colorPrice;
 
-                $discountPrice = $product->discount_price > 0 ? ($product->discount_price + $extraPrice) : 0;
-                if ($flashSaleProduct) {
+                $discountPrice = $baseDiscountPrice > 0 ? ($baseDiscountPrice + $extraPrice) : 0;
+                if ($flashSaleProduct && !$isAgentForShop) {
                     $discountPrice = $flashSaleProduct->pivot->price + $extraPrice;
                 }
 
-                $mainPrice = $product->price + $extraPrice;
+                $mainPrice = $basePrice + $extraPrice;
 
                 // calculate vat taxes
                 $priceTaxAmount = 0;
@@ -182,6 +207,14 @@ class CartRepository extends Repository
         $totalOrderTaxAmount = 0;
         $vatTaxesArray = [];
 
+        // Check if user is an agent for any shops
+        $user = auth()->user();
+        $agentShops = [];
+        if ($user && $user->customer) {
+            $user->customer->load('agentShops');
+            $agentShops = $user->customer->agentShops->pluck('id')->toArray();
+        }
+
         foreach ($carts ?? [] as $cart) {
 
             if (! $cart) {
@@ -189,13 +222,28 @@ class CartRepository extends Repository
             }
 
             $product = $cart->product;
+            
+            // Check if user is an agent for this shop
+            $isAgentForShop = in_array($product->shop_id, $agentShops);
+            
+            // Determine base price
+            if ($isAgentForShop) {
+                $agentPrice = $product->getAgentPrice($product->shop_id);
+                if ($agentPrice) {
+                    $price = $agentPrice;
+                } else {
+                    $price = $product->discount_price > 0 ? $product->discount_price : $product->price;
+                }
+            } else {
+                $price = $product->discount_price > 0 ? $product->discount_price : $product->price;
+            }
+
             $flashSale = $product->flashSales?->first();
             $flashSaleProduct = null;
             $quantity = null;
 
-            $price = $product->discount_price > 0 ? $product->discount_price : $product->price;
-
-            if ($flashSale) {
+            // Flash sales don't apply to agents
+            if ($flashSale && !$isAgentForShop) {
                 $flashSaleProduct = $flashSale?->products()->where('id', $product->id)->first();
 
                 $quantity = $flashSaleProduct?->pivot->quantity - $flashSaleProduct->pivot->sale_quantity;

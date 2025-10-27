@@ -1608,9 +1608,37 @@
     "Flat No": "رقم الشقة",
     "House No": "رقم المنزل",
     "Post Code": "الرمز البريدي",
-    "Address Line": "العنوان"
-
-
-
-
+    "Address Line": "العنوان",
+    "Agents": "الوكلاء",
+    "Agent Price": "سعر الوكيل",
+    "Add Agent": "إضافة وكيل",
+    "Agent Email or Phone": "إيميل أو هاتف الوكيل",
+    "Wholesale Price": "سعر الجملة",
+    "Agent Orders": "طلبات الوكلاء",
+    "Agent List": "قائمة الوكلاء",
+    "Add New Agent": "إضافة وكيل جديد",
+    "Enter customer email or phone number": "أدخل البريد الإلكتروني أو رقم الهاتف للعميل",
+    "Enter the email or phone number of an existing customer to make them an agent": "أدخل البريد الإلكتروني أو رقم الهاتف لعميل موجود لجعله وكيلاً",
+    "User not found with this email or phone": "لم يتم العثور على مستخدم بهذا البريد الإلكتروني أو الهاتف",
+    "This user is not a customer": "هذا المستخدم ليس عميلاً",
+    "This customer is already an agent for your shop": "هذا العميل وكيل بالفعل لمتجرك",
+    "Agent added successfully": "تمت إضافة الوكيل بنجاح",
+    "Agent deleted successfully": "تم حذف الوكيل بنجاح",
+    "activated": "مُفعّل",
+    "deactivated": "مُعطّل",
+    "Agent": "وكيل",
+    "successfully": "بنجاح",
+    "No agents found": "لم يتم العثور على وكلاء",
+    "Are you sure you want to delete this agent?": "هل أنت متأكد من أنك تريد حذف هذا الوكيل؟",
+    "N/A": "غير متوفر",
+    "Special price for wholesale agents": "سعر خاص لوكلاء الجملة",
+    "Wholesale Agent Account": "حساب وكيل جملة",
+    "You are registered as a wholesale agent": "أنت مسجل كوكيل جملة",
+    "You have special wholesale pricing access for the following shops": "لديك صلاحية الوصول لأسعار الجملة الخاصة للمتاجر التالية",
+    "As an agent, you will see special wholesale prices on products from these shops. Contact the shop owner if you have any questions about your agent status.": "كوكيل، سترى أسعار جملة خاصة على المنتجات من هذه المتاجر. اتصل بصاحب المتجر إذا كان لديك أي أسئلة حول حالة الوكيل الخاصة بك.",
+    "Actions": "الإجراءات",
+    "Subscription": "الاشتراك",
+    "Vouchers": "القسائم",
+    "Bulk Product Import": "استيراد المنتجات بالجملة",
+    "Bulk Product Export": "تصدير المنتجات بالجملة"
 }

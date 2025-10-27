@@ -303,6 +303,20 @@
     </li>
 @endhasPermission
 
+@hasPermission('shop.agents.index')
+    <!--- Agents --->
+    <li>
+        <a class="menu {{ $request->routeIs('shop.agents.*') ? 'active' : '' }}"
+            href="{{ route('shop.agents.index') }}">
+            <span>
+                <img class="menu-icon" src="{{ asset('assets/icons-admin/employee.svg') }}" alt="icon"
+                    loading="lazy" />
+                {{ __('Agents') }}
+            </span>
+        </a>
+    </li>
+@endhasPermission
+
 
 @hasPermission(['shop.voucher.index', 'shop.banner.index'])
     <li class="menu-divider">

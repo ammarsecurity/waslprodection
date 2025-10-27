@@ -53,9 +53,16 @@ class OrderRepository extends Repository
 
             $shop = Shop::find($shopId);
 
-            $getCartAmounts = self::getCartWiseAmounts($shop, collect($cartProducts), $request->coupon_code);
+            // Check if user is an agent for this shop
+            $user = auth()->user();
+            $isAgent = false;
+            if ($user && $user->customer) {
+                $isAgent = $user->customer->isAgentFor($shopId);
+            }
 
-            $order = self::createNewOrder($request, $shop, $paymentMethod, $getCartAmounts);
+            $getCartAmounts = self::getCartWiseAmounts($shop, collect($cartProducts), $request->coupon_code, $isAgent);
+
+            $order = self::createNewOrder($request, $shop, $paymentMethod, $getCartAmounts, $isAgent);
 
             $totalPayableAmount += $getCartAmounts['payableAmount'];
             $payment->orders()->attach($order->id);
@@ -65,7 +72,14 @@ class OrderRepository extends Repository
                 $cart->product->decrement('quantity', $cart->quantity);
 
                 $product = $cart->product;
-                $price = $product->discount_price > 0 ? $product->discount_price : $product->price;
+                
+                // Use agent price if user is an agent, otherwise use regular/discount price
+                if ($isAgent) {
+                    $agentPrice = $product->getAgentPrice($shopId);
+                    $price = $agentPrice ?? ($product->discount_price > 0 ? $product->discount_price : $product->price);
+                } else {
+                    $price = $product->discount_price > 0 ? $product->discount_price : $product->price;
+                }
 
                 $flashSale = $product->flashSales?->first();
                 $flashSaleProduct = null;
@@ -140,7 +154,7 @@ class OrderRepository extends Repository
         return $payment;
     }
 
-    private static function createNewOrder($request, $shop, $paymentMethod, $getCartAmounts)
+    private static function createNewOrder($request, $shop, $paymentMethod, $getCartAmounts, $isAgent = false)
     {
         $lastOrderId = self::query()->max('id');
 
@@ -162,6 +176,7 @@ class OrderRepository extends Repository
             'order_status' => OrderStatus::PENDING->value,
             'instruction' => $request->note,
             'payment_status' => PaymentStatus::PENDING->value,
+            'is_agent_order' => $isAgent,
             
             // Store province information
             'province_name' => $request->province_name,
@@ -193,7 +208,7 @@ class OrderRepository extends Repository
         return $order;
     }
 
-    private static function getCartWiseAmounts(Shop $shop, $carts, $couponCode = null): array
+    private static function getCartWiseAmounts(Shop $shop, $carts, $couponCode = null, $isAgent = false): array
     {
         $totalAmount = 0;
         $discount = 0;
@@ -212,7 +227,14 @@ class OrderRepository extends Repository
             }
 
             $product = $cart->product;
-            $price = $product->discount_price > 0 ? $product->discount_price : $product->price;
+            
+            // Use agent price if user is an agent, otherwise use regular/discount price
+            if ($isAgent) {
+                $agentPrice = $product->getAgentPrice($shop->id);
+                $price = $agentPrice ?? ($product->discount_price > 0 ? $product->discount_price : $product->price);
+            } else {
+                $price = $product->discount_price > 0 ? $product->discount_price : $product->price;
+            }
 
             $flashSale = $product->flashSales?->first();
             $flashSaleProduct = null;

@@ -21,6 +21,17 @@ export const useAuth = defineStore("authStore", {
         getAddressById: (state) => (id) => {
             return state.addresses.find((address) => address.id == id);
         },
+        
+        /**
+         * Check if the user is an agent for a specific shop
+         */
+        isAgentFor: (state) => (shopId) => {
+            if (!state.user || !state.user.agent_shops) {
+                return false;
+            }
+            // agent_shops is now an array of objects with id, name, logo
+            return state.user.agent_shops.some(shop => shop.id === shopId);
+        },
     },
 
     actions: {
@@ -88,6 +99,31 @@ export const useAuth = defineStore("authStore", {
                     });
             } else {
                 this.favoriteProducts = 0;
+            }
+        },
+
+        /**
+         * Refresh user data from server
+         */
+        async refreshUser() {
+            if (!this.token) {
+                return;
+            }
+
+            try {
+                const response = await axios.get("/user", {
+                    headers: {
+                        Authorization: this.token,
+                    },
+                });
+                this.user = response.data.data.user;
+            } catch (error) {
+                if (error.response?.status === 401) {
+                    this.token = null;
+                    this.user = null;
+                    this.addresses = [];
+                    this.favoriteProducts = 0;
+                }
             }
         },
 

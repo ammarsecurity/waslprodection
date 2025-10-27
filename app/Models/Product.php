@@ -336,4 +336,24 @@ class Product extends Model
     {
         return $this->hasMany(Favorite::class);
     }
+
+    /**
+     * Get the agent prices for this product.
+     */
+    public function agentPrices(): HasMany
+    {
+        return $this->hasMany(AgentProductPrice::class);
+    }
+
+    /**
+     * Get the agent price for a specific shop.
+     *
+     * @param int $shopId The shop ID
+     * @return float|null The agent price or null if not set
+     */
+    public function getAgentPrice(int $shopId): ?float
+    {
+        $agentPrice = $this->agentPrices()->where('shop_id', $shopId)->first();
+        return $agentPrice ? $agentPrice->agent_price : null;
+    }
 }

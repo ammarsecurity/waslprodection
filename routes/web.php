@@ -39,6 +39,96 @@ Route::get('/change-language', function () {
     return back();
 })->name('change.language');
 
+// Debug routes for agent system (temporary - remove in production)
+Route::get('/debug/check-agent-data', function() {
+    $userId = request()->get('user_id');
+    $productId = request()->get('product_id');
+    
+    if (!$userId) {
+        return response()->json(['error' => 'Please provide user_id parameter']);
+    }
+    
+    $user = \App\Models\User::find($userId);
+    if (!$user || !$user->customer) {
+        return response()->json(['error' => 'User not found or not a customer']);
+    }
+    
+    $customer = $user->customer;
+    
+    // Get ALL agent records (active and inactive)
+    $allAgentRecords = \App\Models\ShopAgent::where('customer_id', $customer->id)
+        ->with('shop')
+        ->get();
+    
+    // Get only active agent records
+    $activeAgentShops = \App\Models\ShopAgent::where('customer_id', $customer->id)
+        ->where('is_active', true)
+        ->with('shop')
+        ->get();
+    
+    // Test the relationship directly
+    $relationshipTest = $customer->agentShops;
+    
+    $result = [
+        'user_id' => $user->id,
+        'customer_id' => $customer->id,
+        'user_name' => $user->name,
+        'user_email' => $user->email,
+        'user_phone' => $user->phone,
+        'all_agent_records_count' => $allAgentRecords->count(),
+        'all_agent_records' => $allAgentRecords->map(function($agent) {
+            return [
+                'agent_id' => $agent->id,
+                'shop_id' => $agent->shop_id,
+                'shop_name' => $agent->shop ? $agent->shop->name : 'No Shop Found',
+                'shop_logo' => $agent->shop ? $agent->shop->logo : null,
+                'is_active' => $agent->is_active,
+                'created_at' => $agent->created_at
+            ];
+        }),
+        'active_agent_shops_count' => $activeAgentShops->count(),
+        'active_agent_shops' => $activeAgentShops->map(function($agent) {
+            return [
+                'agent_id' => $agent->id,
+                'shop_id' => $agent->shop_id,
+                'shop_name' => $agent->shop ? $agent->shop->name : 'No Shop Found',
+                'is_active' => $agent->is_active
+            ];
+        }),
+        'relationship_test_count' => $relationshipTest->count(),
+        'relationship_test' => $relationshipTest->map(function($shop) {
+            return [
+                'shop_id' => $shop->id,
+                'shop_name' => $shop->name,
+                'shop_logo' => $shop->logo
+            ];
+        })
+    ];
+    
+    if ($productId) {
+        $product = \App\Models\Product::find($productId);
+        if ($product) {
+            $agentPrice = \App\Models\AgentProductPrice::where('product_id', $productId)
+                ->where('shop_id', $product->shop_id)
+                ->first();
+            
+            $isAgent = $customer->isAgentFor($product->shop_id);
+            
+            $result['product'] = [
+                'id' => $product->id,
+                'name' => $product->name,
+                'shop_id' => $product->shop_id,
+                'price' => $product->price,
+                'discount_price' => $product->discount_price,
+                'agent_price' => $agentPrice ? $agentPrice->agent_price : null,
+                'is_user_agent_for_this_shop' => $isAgent
+            ];
+        }
+    }
+    
+    return response()->json($result);
+});
+
 // Install Passport and storage routes
 Route::controller(PassportStorageSupportController::class)->group(function () {
     Route::get('/install-passport', 'index')->name('passport.install.index');

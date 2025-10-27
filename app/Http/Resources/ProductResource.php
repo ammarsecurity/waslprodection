@@ -16,12 +16,17 @@ class ProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $this->load(['reviews', 'orders', 'sizes', 'colors', 'unit', 'brand', 'shop', 'flashSales']);
+        $this->load(['reviews', 'orders', 'sizes', 'colors', 'unit', 'brand', 'shop', 'flashSales', 'agentPrices']);
 
         $lang = request()->header('accept-language') ?? 'en';
 
         $favorite = false;
         $user = Auth::guard('api')->user();
+        
+        // Load customer relationship if user exists
+        if ($user) {
+            $user->loadMissing('customer.agentShops');
+        }
 
         if ($user && $user->customer) {
             $favorite = $user->customer->favorites()->where('product_id', $this->id)->exists();
@@ -50,6 +55,23 @@ class ProductResource extends JsonResource
         $price = $this->price;
         $discountPrice = $flashSaleProduct ? $flashSaleProduct->pivot->price : $this->discount_price;
 
+        // Check if user is an agent for this shop
+        $isAgent = false;
+        if ($user && $user->customer) {
+            $isAgent = $user->customer->isAgentFor($this->shop_id);
+            
+            if ($isAgent) {
+                $agentPrice = $this->getAgentPrice($this->shop_id);
+                
+                if ($agentPrice) {
+                    // Override price with agent price
+                    $price = $agentPrice;
+                    $discountPrice = 0; // Set to 0 instead of null to avoid showing discount
+                    $discountPercentage = 0;
+                }
+            }
+        }
+
         $translation = $this->translations()?->where('lang', $lang)->first();
         $name = $translation?->name ?? $this->name;
 
@@ -61,7 +83,7 @@ class ProductResource extends JsonResource
             'name' => $name,
             'thumbnail' => $this->thumbnail,
             'price' => (float) number_format($price, 2, '.', ''),
-            'discount_price' => (float) number_format($discountPrice, 2, '.', ''),
+            'discount_price' => $discountPrice ? (float) number_format($discountPrice, 2, '.', '') : 0.00,
             'discount_percentage' => (float) number_format($discountPercentage, 2, '.', ''),
             'rating' => (float) $this->averageRating ?? 0.0,
             'total_reviews' => (string) Number::abbreviate($this->reviews?->count(), maxPrecision: 2),

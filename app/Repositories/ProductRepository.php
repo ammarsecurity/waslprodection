@@ -156,6 +156,19 @@ class ProductRepository extends Repository
             $product->medias()->attach($thumbnail->id);
         }
 
+        // Save agent price if provided
+        if ($request->filled('agent_price') && $shop) {
+            \App\Models\AgentProductPrice::updateOrCreate(
+                [
+                    'product_id' => $product->id,
+                    'shop_id' => $shop->id,
+                ],
+                [
+                    'agent_price' => $request->agent_price,
+                ]
+            );
+        }
+
         return $product;
     }
 
@@ -279,6 +292,25 @@ class ProductRepository extends Repository
             }
 
             self::updatePreviousThumbnail($request->previousThumbnail);
+        }
+
+        // Update agent price if provided
+        $shop = generaleSetting('shop');
+        if ($request->filled('agent_price') && $shop) {
+            \App\Models\AgentProductPrice::updateOrCreate(
+                [
+                    'product_id' => $product->id,
+                    'shop_id' => $shop->id,
+                ],
+                [
+                    'agent_price' => $request->agent_price,
+                ]
+            );
+        } elseif ($request->has('agent_price') && empty($request->agent_price) && $shop) {
+            // Delete agent price if field is cleared
+            \App\Models\AgentProductPrice::where('product_id', $product->id)
+                ->where('shop_id', $shop->id)
+                ->delete();
         }
 
         return $product;

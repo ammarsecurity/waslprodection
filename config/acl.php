@@ -63,6 +63,7 @@ return [
             'gallery' => ['index', 'store'],
             'pos' => ['index', 'sales', 'draft'],
             'employee' => ['index', 'create', 'edit', 'destroy', 'toggle', 'reset.password', 'permission', 'permission.update'],
+            'agents' => ['index', 'create', 'store', 'toggle-status', 'destroy'],
             'profile' => ['index', 'edit', 'change-password'],
         ],
         'shopMultiShop' => [
@@ -98,6 +99,8 @@ return [
         'subcategory' => 'sub category',
         'generale-setting' => 'general setting',
         'business-setting' => 'business setting',
+        'agents' => 'agents',
+        'toggle-status' => 'toggle status',
         'socialLink' => 'social link',
         'legalPage' => 'legal page',
         'themeColor' => 'theme color',
