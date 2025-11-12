@@ -48,7 +48,7 @@
                                 </div>
                             </div>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">{{ moment(chat.created_at).format('hh:mm a, DD MMM, YYYY') }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ dayjs(chat.created_at).format('hh:mm a, DD MMM, YYYY') }}</p>
                     </div>
                     <div v-else class="flex flex-col max-w-[75%]"
                         :class="chat.type == 'user' ? 'text-end justify-end items-end' : 'text-start justify-start items-start'">
@@ -56,7 +56,7 @@
                             v-html="linkify(chat.message)"
                             :class="chat.type == 'user' ? 'bg-[#EE446A] text-white' : 'bg-gray-50 text-black'">
                         </div>
-                        <span class="text-[10px] text-gray-500 mt-0.5">{{ moment(chat.created_at).format('hh:mm a, DD MMM, YYYY') }}</span>
+                        <span class="text-[10px] text-gray-500 mt-0.5">{{ dayjs(chat.created_at).format('hh:mm a, DD MMM, YYYY') }}</span>
                     </div>
 
 
@@ -92,9 +92,9 @@ import { StarIcon } from '@heroicons/vue/24/solid';
 import { XMarkIcon } from '@heroicons/vue/24/outline';
 import { useMaster } from '../stores/MasterStore';
 import { useAuth } from '../stores/AuthStore';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import axios from 'axios';
-import Pusher from 'pusher-js';
+import { subscribeToChannel } from '@/utils/pusherClient';
 
 const emit = defineEmits(['close'])
 
@@ -119,6 +119,7 @@ const shopOnline = ref(false);
 
 const messages = ref([]);
 let scrollTimeout;
+let unsubscribeFromPusher = null;
 
 let data = ref({
     message: null,
@@ -145,6 +146,19 @@ watch(() => props.show, () => {
         initScroll();
     }
 });
+
+watch(
+    () => ({
+        key: masterStore.pusher_app_key,
+        cluster: masterStore.pusher_app_cluster,
+        userId: authStore.user?.id,
+    }),
+    () => {
+        if (props.show) {
+            handlePusherChanel();
+        }
+    }
+);
 
 const fetchMessages = async (goToScrollBottom = false) => {
 
@@ -261,28 +275,33 @@ const sendMessage = async () => {
     }
 };
 
-const handlePusherChanel = () => {
-    let userId = authStore.user.id;
+const handlePusherChanel = async () => {
+    if (unsubscribeFromPusher) {
+        unsubscribeFromPusher();
+        unsubscribeFromPusher = null;
+    }
 
-    if (!masterStore.pusher_app_key) {
+    if (!masterStore.pusher_app_key || !authStore.user?.id) {
         return;
     }
 
-    // Pusher.logToConsole = true;
-
-    const pusher = new Pusher(masterStore.pusher_app_key, {
-        cluster: masterStore.pusher_app_cluster,
-        encrypted: true,
-    });
-
-    const channel = pusher.subscribe('chat_user_' + userId);
-
-    channel.bind('send-message-to-user', function (data) {
-        console.log('Received message:');
-        fetchMessages(true);
-        scrollToBottom();
-    });
-}
+    try {
+        unsubscribeFromPusher = await subscribeToChannel(
+            {
+                key: masterStore.pusher_app_key,
+                cluster: masterStore.pusher_app_cluster,
+            },
+            `chat_user_${authStore.user.id}`,
+            'send-message-to-user',
+            () => {
+                fetchMessages(true);
+                scrollToBottom();
+            }
+        );
+    } catch (error) {
+        console.error('Failed to initialise chat sidebar listener', error);
+    }
+};
 
 const scrollToBottom = () => {
     nextTick(() => {
@@ -315,6 +334,10 @@ const initScroll = () => {
 onUnmounted(() => {
     if (chatContainer.value) {
         chatContainer.value.removeEventListener('scroll', handleScroll);
+    }
+    if (unsubscribeFromPusher) {
+        unsubscribeFromPusher();
+        unsubscribeFromPusher = null;
     }
 });
 
