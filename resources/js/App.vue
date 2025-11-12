@@ -11,23 +11,14 @@ import { onMounted, onBeforeUnmount, watch } from 'vue';
 import { useAuth } from './stores/AuthStore';
 import { useMaster } from './stores/MasterStore';
 import { useChat } from './stores/ChatStore';
-import Pusher from 'pusher-js';
 import { useRoute } from 'vue-router';
-
+import { subscribeToChannel } from './utils/pusherClient';
 
 const authStore = useAuth();
 const masterStore = useMaster();
 const chatStore = useChat();
 const route = useRoute();
-
-
-onMounted(() => {
-    // startLastSeenUpdater(); // Start interval
-    // callLastSeenUpdater();  // Immediate call on mount
-    handlePusherChanel();
-});
-
-onBeforeUnmount(() => clearInterval(startLastSeenUpdater.intervalId));
+let unsubscribeFromPusher = null;
 
 // const callLastSeenUpdater = async () => {
 //     await axios.post('/update-last-seen', {}, {
@@ -64,28 +55,62 @@ const fetchUnreadMessages = async () => {
 };
 
 
-const handlePusherChanel = () => {
+const bindChatChannel = async () => {
+    const key = masterStore.pusher_app_key;
+    const cluster = masterStore.pusher_app_cluster;
+    const userId = authStore.user?.id;
 
-    Pusher.logToConsole = false;
+    if (unsubscribeFromPusher) {
+        unsubscribeFromPusher();
+        unsubscribeFromPusher = null;
+    }
 
-    if (!masterStore.pusher_app_key) {
+    if (!key || !userId) {
         return;
     }
 
-    const pusher = new Pusher(masterStore.pusher_app_key, {
+    try {
+        unsubscribeFromPusher = await subscribeToChannel(
+            { key, cluster },
+            `chat_user_${userId}`,
+            'send-message-to-user',
+            () => {
+                if (route.path !== '/massages') {
+                    chatStore.activeShop = null;
+                    fetchUnreadMessages();
+                }
+            }
+        );
+    } catch (error) {
+        console.error('Failed to initialise chat channel', error);
+    }
+};
+
+onMounted(() => {
+    // startLastSeenUpdater(); // Start interval
+    // callLastSeenUpdater();  // Immediate call on mount
+    bindChatChannel();
+});
+
+onBeforeUnmount(() => {
+    if (unsubscribeFromPusher) {
+        unsubscribeFromPusher();
+        unsubscribeFromPusher = null;
+    }
+    if (typeof startLastSeenUpdater !== 'undefined' && startLastSeenUpdater?.intervalId) {
+        clearInterval(startLastSeenUpdater.intervalId);
+    }
+});
+
+watch(
+    () => ({
+        key: masterStore.pusher_app_key,
         cluster: masterStore.pusher_app_cluster,
-        encrypted: true,
-    });
-
-    let userId = authStore.user.id;
-
-    const channel = pusher.subscribe('chat_user_' + userId);
-
-    channel.bind('send-message-to-user', function (data) {
-        if (route.path != '/massages') {
-            chatStore.activeShop = null;
-            fetchUnreadMessages();
-        }
-    });
-}
+        userId: authStore.user?.id,
+    }),
+    () => {
+        bindChatChannel();
+    },
+    { immediate: false }
+);
 </script>

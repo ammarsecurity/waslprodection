@@ -101,7 +101,7 @@
                                         </div>
                                     </div>
                                     <p class="text-xs text-gray-500 mt-1">
-                                        {{ moment(chat.created_at).format('hh:mm a, DD MMM, YYYY') }}
+                                        {{ dayjs(chat.created_at).format('hh:mm a, DD MMM, YYYY') }}
                                     </p>
                                 </div>
                                 <div v-else class="flex flex-col max-w-[75%]"
@@ -111,7 +111,7 @@
                                         :class="chat.type == 'user' ? 'bg-[#EE446A] text-white' : 'bg-gray-50 text-black'">
                                     </div>
                                     <p class="text-xs text-gray-500 mt-1">
-                                        {{ moment(chat.created_at).format('hh:mm a, DD MMM, YYYY') }}
+                                        {{ dayjs(chat.created_at).format('hh:mm a, DD MMM, YYYY') }}
                                     </p>
                                 </div>
 
@@ -158,7 +158,6 @@
 
 <script setup>
 import AuthPageHeader from "../components/AuthPageHeader.vue";
-import Pusher from 'pusher-js';
 import { StarIcon } from '@heroicons/vue/24/solid';
 import axios from "axios";
 import { ref, onMounted, watch, nextTick, onUnmounted } from 'vue';
@@ -166,7 +165,8 @@ import { useRoute } from "vue-router";
 import { useAuth } from "@/stores/AuthStore";
 import { useChat } from "@/stores/ChatStore";
 import { useMaster } from "@/stores/MasterStore";
-import moment from 'moment';
+import dayjs from 'dayjs';
+import { subscribeToChannel } from '@/utils/pusherClient';
 
 const route = useRoute();
 
@@ -178,6 +178,7 @@ const chatStore = useChat();
 const masterStore = useMaster();
 let shopOnline = ref(false);
 let debounceTimer;
+let unsubscribeFromPusher = null;
 
 
 let shops = ref([]);
@@ -389,6 +390,17 @@ onMounted(async () => {
     shopContainer.value?.addEventListener('scroll', handleScrollBottom);
 });
 
+watch(
+    () => ({
+        key: masterStore.pusher_app_key,
+        cluster: masterStore.pusher_app_cluster,
+        userId: authStore.user?.id,
+    }),
+    () => {
+        handlePusherChanel();
+    }
+);
+
 const handleScrollTop = () => {
     if (chatContainer.value.scrollTop < 300 && !loadingMore.value && !allLoaded.value) {
         page.value += 1;
@@ -418,34 +430,43 @@ const handleScrollBottom = () => {
 onUnmounted(() => {
     chatContainer.value?.removeEventListener('scroll', handleScrollTop);
     shopContainer.value?.removeEventListener('scroll', handleScrollBottom);
+    if (unsubscribeFromPusher) {
+        unsubscribeFromPusher();
+        unsubscribeFromPusher = null;
+    }
 });
 
 
-const handlePusherChanel = () => {
+const handlePusherChanel = async () => {
+    if (unsubscribeFromPusher) {
+        unsubscribeFromPusher();
+        unsubscribeFromPusher = null;
+    }
 
-    Pusher.logToConsole = false;
-
-    if (!masterStore.pusher_app_key) {
+    if (!masterStore.pusher_app_key || !authStore.user?.id) {
         return;
     }
 
-    const pusher = new Pusher(masterStore.pusher_app_key, {
-        cluster: masterStore.pusher_app_cluster,
-        encrypted: true,
-    });
-
-    let userId = authStore.user.id;
-
-    const channel = pusher.subscribe('chat_user_' + userId);
-
-    channel.bind('send-message-to-user', function (data) {
-        if (route.path == '/massages') {
-            fetchShops();
-            getMessages();
-            fetchUnreadMessages();
-        }
-    });
-}
+    try {
+        unsubscribeFromPusher = await subscribeToChannel(
+            {
+                key: masterStore.pusher_app_key,
+                cluster: masterStore.pusher_app_cluster,
+            },
+            `chat_user_${authStore.user.id}`,
+            'send-message-to-user',
+            () => {
+                if (route.path == '/massages') {
+                    fetchShops();
+                    getMessages();
+                    fetchUnreadMessages();
+                }
+            }
+        );
+    } catch (error) {
+        console.error('Failed to initialise chat listener', error);
+    }
+};
 
 const searchShops = (e) => {
     clearTimeout(debounceTimer); // clear previous timer

@@ -19,7 +19,6 @@ import { createPinia } from "pinia";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 
 import localization from "./localization";
-import ChatBox from "./pages/Messages.vue";
 
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
@@ -34,6 +33,4 @@ app.use(pinia);
 app.use(router);
 app.use(VueAwesomePaginate);
 app.use(Toast);
-app.component("chat-box", ChatBox);
-app.mount("#chat-app");
 app.mount("#app");

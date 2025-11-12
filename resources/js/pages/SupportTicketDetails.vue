@@ -31,14 +31,14 @@
 
 <script setup>
 import { UserIcon } from '@heroicons/vue/24/outline';
-import Pusher from 'pusher-js';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, onUnmounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import AuthPageHeader from '../components/AuthPageHeader.vue';
 import SupportTicketDetails from '../components/SupportTicketDetails.vue';
 import SupportTicketMessages from '../components/SupportTicketMessages.vue';
 import { useAuth } from "../stores/AuthStore";
 import { useMaster } from '../stores/MasterStore';
+import { subscribeToChannel } from '@/utils/pusherClient';
 
 const authStore = useAuth();
 const route = useRoute();
@@ -50,24 +50,52 @@ const supportTicket = ref({});
 const messages = ref([]);
 
 const highlightedMessages = ref([]);
+let unsubscribeFromPusher = null;
+
+const subscribeToSupportTicketChannel = async () => {
+    if (unsubscribeFromPusher) {
+        unsubscribeFromPusher();
+        unsubscribeFromPusher = null;
+    }
+
+    if (!masterStore.pusher_app_key) {
+        return;
+    }
+
+    try {
+        unsubscribeFromPusher = await subscribeToChannel(
+            {
+                key: masterStore.pusher_app_key,
+                cluster: masterStore.pusher_app_cluster,
+            },
+            'support-ticket-message-channel',
+            'support-ticket-message-event',
+            (data) => {
+                const ticketNumber = data.ticket_number;
+                if (ticketNumber == route.params.ticketNumber) {
+                    fetchSupportTicket();
+                }
+            }
+        );
+    } catch (error) {
+        console.error('Failed to subscribe to support ticket updates', error);
+    }
+};
 
 onMounted(() => {
     fetchSupportTicket();
-
-    const pusher = new Pusher(masterStore.pusher_app_key, {
-        cluster: masterStore.pusher_app_cluster,
-        encrypted: true,
-    });
-
-    const channel = pusher.subscribe('support-ticket-message-channel');
-
-    channel.bind('support-ticket-message-event', function (data) {
-        var ticketNumber = data.ticket_number;
-        if (ticketNumber == route.params.ticketNumber) {
-            fetchSupportTicket();
-        }
-    });
+    subscribeToSupportTicketChannel();
 });
+
+watch(
+    () => ({
+        key: masterStore.pusher_app_key,
+        cluster: masterStore.pusher_app_cluster,
+    }),
+    () => {
+        subscribeToSupportTicketChannel();
+    }
+);
 
 const fetchSupportTicket = () => {
     axios.get('support-ticket/show', {
@@ -91,5 +119,12 @@ const fetchSupportTicket = () => {
         }
     });
 };
+
+onUnmounted(() => {
+    if (unsubscribeFromPusher) {
+        unsubscribeFromPusher();
+        unsubscribeFromPusher = null;
+    }
+});
 
 </script>
