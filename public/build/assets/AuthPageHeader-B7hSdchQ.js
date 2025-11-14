@@ -1,0 +1,1 @@
+import{u as e,aK as a,b9 as s}from"./vendor-Cy4BBKy_.js";const i={class:"py-3 px-2 text-slate-800 text-lg md:text-2xl font-medium tracking-tight md:leading-loose bg-white"},l={__name:"AuthPageHeader",props:{title:String},setup(t){return(o,n)=>(a(),e("div",i,s(t.title),1))}};export{l as _};

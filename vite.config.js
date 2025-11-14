@@ -7,7 +7,7 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const chunkGroups = {
-    framework: ["vue", "vue-router", "pinia", "pinia-plugin-persistedstate"],
+    framework: ["vue", "vue-router", "pinia", "pinia-plugin-persistedstate", "vue-i18n"],
     ui: ["@headlessui/vue", "@heroicons/vue", "vue-select", "vue-awesome-paginate", "vue-toastification"],
     realtime: ["pusher-js"],
     media: ["swiper", "lightgallery"],
@@ -26,7 +26,11 @@ const manualChunks = (id) => {
     }
 
     for (const [name, packages] of Object.entries(chunkGroups)) {
-        if (packages.some((pkg) => id.includes(`/node_modules/${pkg}/`))) {
+        if (packages.some((pkg) => {
+            // Match exact package name or scoped package
+            const pkgPath = pkg.startsWith("@") ? pkg : `/${pkg}/`;
+            return id.includes(`/node_modules/${pkgPath}`);
+        })) {
             return name;
         }
     }
@@ -56,7 +60,7 @@ export default defineConfig({
         },
     },
     optimizeDeps: {
-        include: ["axios", "dayjs", "pinia", "pinia-plugin-persistedstate"],
+        include: ["axios", "dayjs", "pinia", "pinia-plugin-persistedstate", "vue-i18n"],
         exclude: ["pusher-js"],
     },
 });
