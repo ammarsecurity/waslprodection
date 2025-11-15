@@ -396,20 +396,26 @@ const showProductDetails = () => {
 .image-section {
     position: relative;
     width: 100%;
-    height: 260px;
+    height: 160px;
     overflow: hidden;
     background: #fafafa;
 }
 
 @media (min-width: 640px) {
     .image-section {
-        height: 280px;
+        height: 200px;
     }
 }
 
 @media (min-width: 1024px) {
     .image-section {
-        height: 300px;
+        height: 200px;
+    }
+}
+
+@media (min-width: 1280px) {
+    .image-section {
+        height: 180px;
     }
 }
 
@@ -573,26 +579,56 @@ const showProductDetails = () => {
 
 /* Details Section */
 .details-section {
-    padding: 14px 16px;
+    padding: 10px 12px;
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 6px;
     cursor: pointer;
 }
 
+@media (min-width: 640px) {
+    .details-section {
+        padding: 12px 14px;
+        gap: 8px;
+    }
+}
+
+@media (min-width: 1280px) {
+    .details-section {
+        padding: 10px 12px;
+        gap: 6px;
+    }
+}
+
 .product-name {
-    font-size: 14.5px;
+    font-size: 12.5px;
     font-weight: 600;
     color: #1f2937;
-    line-height: 1.5;
+    line-height: 1.35;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     transition: color 0.2s ease;
-    min-height: 42px;
+    min-height: 34px;
+}
+
+@media (min-width: 640px) {
+    .product-name {
+        font-size: 13.5px;
+        min-height: 38px;
+        line-height: 1.4;
+    }
+}
+
+@media (min-width: 1280px) {
+    .product-name {
+        font-size: 13px;
+        min-height: 36px;
+        line-height: 1.35;
+    }
 }
 
 .product-card:hover .product-name {
@@ -603,7 +639,19 @@ const showProductDetails = () => {
 .price-section {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
+}
+
+@media (min-width: 640px) {
+    .price-section {
+        gap: 5px;
+    }
+}
+
+@media (min-width: 1280px) {
+    .price-section {
+        gap: 4px;
+    }
 }
 
 .price-wrapper {
@@ -614,19 +662,43 @@ const showProductDetails = () => {
 }
 
 .current-price {
-    font-size: 19px;
+    font-size: 15px;
     font-weight: 700;
     color: #1f2937;
     line-height: 1;
 }
 
+@media (min-width: 640px) {
+    .current-price {
+        font-size: 17px;
+    }
+}
+
+@media (min-width: 1280px) {
+    .current-price {
+        font-size: 16px;
+    }
+}
+
 .original-price {
-    font-size: 14px;
+    font-size: 11.5px;
     color: #9ca3af;
     text-decoration: line-through;
     line-height: 1;
     position: relative;
     font-weight: 500;
+}
+
+@media (min-width: 640px) {
+    .original-price {
+        font-size: 13px;
+    }
+}
+
+@media (min-width: 1280px) {
+    .original-price {
+        font-size: 12px;
+    }
 }
 
 .original-price::after {

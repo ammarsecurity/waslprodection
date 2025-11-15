@@ -11,7 +11,7 @@
                 </router-link>
             </div>
 
-            <div class="mt-6 grid grid-cols-1 xl:grid-cols-5 gap-6 lg:gap-8 items-start">
+            <div class="mt-6 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-8 2xl:grid-cols-8 gap-6 lg:gap-8 items-start">
 
                 <!-- Flash Sale Banner -->
                 <div class="p-3 xl:p-6 rounded-xl flex-col sm:flex-row xl:flex-col justify-between xl:justify-center items-center gap-2 md:gap-4 flex" style="background: conic-gradient(from 180deg at 50% 50%, #8B5CF6 0deg, #C622FF 132.50098586082458deg, #5C87F6 271.2626552581787deg, #8B5CF6 360deg);">

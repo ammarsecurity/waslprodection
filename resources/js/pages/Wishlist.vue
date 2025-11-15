@@ -6,7 +6,7 @@
         <div class="p-3 md:p-4 xl:p-6">
 
             <div
-                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 items-start">
+                class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-8 2xl:grid-cols-8 gap-6 items-start">
                 <ProductCard v-for="product in products" :key="product.id" :product="product" />
             </div>
 

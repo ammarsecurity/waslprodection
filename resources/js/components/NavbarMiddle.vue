@@ -2,8 +2,14 @@
     <div class="main-container py-2 flex items-center justify-between gap-8">
 
         <div class="flex items-center gap-8 grow">
-            <router-link to="/" class="w-[130px] md:w-[180px] lg:w-[240px]">
-                <img :src="master.logo" alt="" class="h-11">
+            <!-- Shop Logo for Checkout Pages -->
+            <div v-if="showShopLogo && master.shopLogo" class="flex items-center gap-2">
+                <div class="shop-logo-checkout">
+                    <img :src="master.shopLogo" alt="Shop Logo" class="shop-logo-img">
+                </div>
+            </div>
+            <router-link to="/" :class="showShopLogo ? 'w-[100px] md:w-[120px] lg:w-[140px]' : 'w-[130px] md:w-[180px] lg:w-[240px]'">
+                <img :src="master.logo" alt="" :class="showShopLogo ? 'h-8' : 'h-11'">
             </router-link>
             <div class="relative overflow-hidden grow max-w-[800px] hidden md:block">
                 <input type="text" v-model="search" :placeholder="$t('Search product')"
@@ -271,7 +277,7 @@
 import { Dialog, DialogPanel, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { Bars3Icon, ChevronRightIcon, UserIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/solid'
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AuthUserDropdown from './AuthUserDropdown.vue'
 import LoginModal from './LoginModal.vue'
@@ -286,6 +292,13 @@ const basketStore = useBasketStore();
 
 const AuthStore = useAuth();
 const master = useMaster();
+
+// Check if current route is a checkout page
+const showShopLogo = computed(() => {
+    return route.path === '/checkout' || 
+           route.path === '/guest-checkout' || 
+           route.path === '/buynow';
+});
 
 const search = ref('');
 const showSearch = ref(false);
@@ -354,5 +367,37 @@ const searchProducts = () => {
 .fade-enter-from,
 .fade-leave-to {
     opacity: 0;
+}
+
+.shop-logo-checkout {
+    position: relative;
+    padding: 4px;
+    background: linear-gradient(135deg, 
+        rgba(59, 130, 246, 0.1),
+        rgba(59, 130, 246, 0.05),
+        rgba(59, 130, 246, 0.1)
+    );
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.shop-logo-img {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 2px solid white;
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(59, 130, 246, 0.15);
+    background: white;
+}
+
+@media (min-width: 768px) {
+    .shop-logo-img {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+    }
 }
 </style>

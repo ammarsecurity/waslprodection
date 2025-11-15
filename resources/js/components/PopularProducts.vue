@@ -14,7 +14,7 @@
         <SkeletonLoader v-else class="w-48 sm:w-60 md:w-72 lg:w-96 h-12 rounded-lg" />
 
         <!-- Products -->
-        <div class="mt-8 grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-6 items-start">
+        <div class="mt-8 grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-8 2xl:grid-cols-8 gap-3 md:gap-6 items-start">
 
             <div v-if="!isLoading" v-for="product in products" :key="product.id" class="w-full">
                 <ProductCard :product="product"/>

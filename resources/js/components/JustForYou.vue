@@ -9,14 +9,14 @@
 
         <!-- Products -->
         <div v-if="!isLoading && products"
-            class="mt-4 md:mt-8 grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-6 items-start">
+            class="mt-4 md:mt-8 grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-8 2xl:grid-cols-8 gap-3 md:gap-6 items-start">
             <div v-for="product in products" :key="product.id" class="w-full">
                 <ProductCard :product="product" />
             </div>
         </div>
 
         <!-- loading -->
-         <div v-if="isLoading" class="mt-4 md:mt-8 grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-6 items-start">
+         <div v-if="isLoading" class="mt-4 md:mt-8 grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-8 2xl:grid-cols-8 gap-3 md:gap-6 items-start">
              <div v-for="i in 6" :key="i">
                  <SkeletonLoader class="w-full h-[220px] sm:h-[330px]" />
             </div>
