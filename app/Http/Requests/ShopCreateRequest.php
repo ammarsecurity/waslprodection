@@ -59,6 +59,10 @@ class ShopCreateRequest extends FormRequest
             'shop_banner' => [$required, 'image', 'mimes:jpg,png,jpeg,gif', 'max:2048'],
             'description' => ['nullable', 'string', 'max:200'],
             'chat_id' => ['nullable', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255', 'regex:/^[a-z0-9-]+$/', 'unique:shops,slug'],
+            'subdomain' => ['nullable', 'string', 'max:255', 'regex:/^[a-z0-9-]+$/', 'unique:shops,subdomain'],
+            'custom_domain' => ['nullable', 'string', 'max:255', 'regex:/^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i', 'unique:shops,custom_domain'],
+            'is_root_shop' => ['nullable', 'boolean'],
         ];
     }
 

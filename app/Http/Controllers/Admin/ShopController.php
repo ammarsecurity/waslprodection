@@ -86,11 +86,6 @@ class ShopController extends Controller
     {
         $user = \App\Models\User::findOrFail($userId);
 
-        // Prevent updating root user
-        if ($user->hasRole('root')) {
-            return back()->with('error', __('You cannot update the root user'));
-        }
-
         // If email is changed, ensure it's unique
         if ($request->email !== $user->email) {
             $request->validate([
@@ -155,11 +150,6 @@ class ShopController extends Controller
             return back()->with('demoMode', 'You can not update status of the shop in demo mode');
         }
 
-        $user = $shop->user;
-        if ($user->hasRole('root')) {
-            return back()->with('error', __('You can not update status of the root shop'));
-        }
-
         // Update the user status
         $shop->user()->update([
             'is_active' => ! $shop->user->is_active,
@@ -220,6 +210,31 @@ class ShopController extends Controller
         ]);
 
         return back()->withSuccess(__('Shop password reset successfully'));
+    }
+
+    /**
+     * Delete a shop.
+     */
+    public function destroy(Shop $shop)
+    {
+        // If this is the root shop, ensure there's at least one other shop to become root
+        if ($shop->is_root_shop) {
+            $otherShops = Shop::where('id', '!=', $shop->id)->where('is_root_shop', false)->count();
+            if ($otherShops == 0) {
+                return back()->with('error', __('Cannot delete the root shop. At least one other shop must exist.'));
+            }
+            
+            // Assign root shop status to the first available shop
+            $newRootShop = Shop::where('id', '!=', $shop->id)->where('is_root_shop', false)->first();
+            if ($newRootShop) {
+                $newRootShop->update(['is_root_shop' => true]);
+            }
+        }
+
+        // Delete the shop (this will cascade delete related records if foreign keys are set up)
+        $shop->delete();
+
+        return to_route('admin.shop.index')->withSuccess(__('Shop deleted successfully'));
     }
 
     public function toggleReview($reviewId)

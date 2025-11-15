@@ -12,6 +12,7 @@ use App\Http\Resources\ProductResource;
 use App\Http\Resources\ReviewResource;
 use App\Http\Resources\SizeResource;
 use App\Models\FlashSale;
+use App\Models\Shop;
 use App\Repositories\ProductRepository;
 use App\Repositories\ReviewRepository;
 use Illuminate\Http\Request;
@@ -31,7 +32,7 @@ class ProductController extends Controller
     $skip = ($page * $perPage) - $perPage;
 
     $search = $request->search;
-    $shopID = $request->shop_id;
+    $shopID = $this->resolveShopId($request->shop_id);
     $categoryID = $request->category_id;
     $subCategoryID = $request->sub_category_id;
 
@@ -46,15 +47,22 @@ class ProductController extends Controller
     $colorID = $request->color_id;
     $sizeID = $request->size_id;
 
+    // Get current shop from middleware
+    $currentShop = $request->get('current_shop');
+    
     $generaleSetting = generaleSetting('setting');
     $shop = null;
-    if ($generaleSetting?->shop_type == 'single') {
+    
+    // If current shop is set and it's not root shop, use it
+    if ($currentShop && !$currentShop->isRootShop()) {
+        $shop = $currentShop;
+    } elseif ($generaleSetting?->shop_type == 'single') {
         $shop = generaleSetting('rootShop');
     }
 
     // get data for
     $rootShop = $shop ?? generaleSetting('rootShop');
-    $productQuery = ProductRepository::query()->when($shop, function ($query) use ($shop) {
+    $productQuery = ProductRepository::query()->when($shop && !$shop->isRootShop(), function ($query) use ($shop) {
         return $query->where('shop_id', $shop->id);
     })->isActive();
 
@@ -76,9 +84,9 @@ class ProductController extends Controller
         ->withSum('orders as orders_count', 'order_products.quantity')
         ->withAvg('reviews as average_rating', 'rating')
         ->isActive()
-        ->when($shop, function ($query) use ($shop) {
+        ->when($shop && !$shop->isRootShop(), function ($query) use ($shop) {
             return $query->where('shop_id', $shop->id);
-        })->when($shopID && !$shop, function ($query) use ($shopID) {
+        })->when($shopID && (!$shop || $shop->isRootShop()), function ($query) use ($shopID) {
             return $query->where('shop_id', $shopID);
         })
         ->when($search, function ($query) use ($search) {
@@ -277,7 +285,7 @@ class ProductController extends Controller
      */
     public function discounted(Request $request)
     {
-        $shopID = $request->shop_id;
+        $shopID = $this->resolveShopId($request->shop_id);
         $products = ProductRepository::query()
             ->isActive()
             ->where('discount_price', '>', 0)
@@ -297,7 +305,7 @@ class ProductController extends Controller
      */
     public function new(Request $request)
     {
-        $shopID = $request->shop_id;
+        $shopID = $this->resolveShopId($request->shop_id);
         $products = ProductRepository::query()
             ->isActive()
             ->when($shopID, function ($query) use ($shopID) {
@@ -309,5 +317,21 @@ class ProductController extends Controller
         return $this->json('new products', [
             'products' => ProductResource::collection($products),
         ]);
+    }
+
+    /**
+     * Resolve shop identifier (id or slug) to numeric id.
+     */
+    protected function resolveShopId($identifier): ?int
+    {
+        if (blank($identifier)) {
+            return null;
+        }
+
+        if (is_numeric($identifier) && Shop::whereKey($identifier)->exists()) {
+            return (int) $identifier;
+        }
+
+        return Shop::where('slug', $identifier)->value('id');
     }
 }

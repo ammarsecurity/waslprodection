@@ -62,6 +62,8 @@ export const useMaster = defineStore("masterStore", {
         orderPlaceAccountVerify: false,
         menus: [],
         footers: [],
+        currentShop: null,
+        isRootShop: false,
     }),
 
     getters: {
@@ -78,6 +80,12 @@ export const useMaster = defineStore("masterStore", {
         },
         getMultiVendor: (state) => {
             return state.multiVendor;
+        },
+        getCurrentShop: (state) => {
+            return state.currentShop;
+        },
+        getIsRootShop: (state) => {
+            return state.isRootShop;
         },
     },
 
@@ -121,6 +129,8 @@ export const useMaster = defineStore("masterStore", {
                 this.orderPlaceAccountVerify = data.order_place_account_verify;
                 this.menus = data.menus;
                 this.footers = data.footers;
+                this.currentShop = data.current_shop;
+                this.isRootShop = data.current_shop?.is_root_shop ?? false;
 
                 // Check localStorage first for user's language preference
                 const savedLocale = localStorage.getItem('locale');

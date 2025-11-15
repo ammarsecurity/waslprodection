@@ -17,6 +17,8 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
+        $currentShop = $request->get('current_shop');
+        
         $page = $request->page ?? 1;
         $perPage = $request->per_page ?? 20;
         $skip = ($page - 1) * $perPage;
@@ -24,6 +26,15 @@ class CategoryController extends Controller
         // Get all active categories with their shops
         $categoriesQuery = CategoryRepository::query()->active()
             ->with(['subCategories', 'shops']);
+
+        // If it's a sub shop, filter categories by shop
+        if ($currentShop && !$currentShop->isRootShop()) {
+            $categoriesQuery->whereIn('id', function ($query) use ($currentShop) {
+                $query->select('category_id')
+                    ->from('shop_categories')
+                    ->where('shop_id', $currentShop->id);
+            });
+        }
 
         $total = $categoriesQuery->count();
 

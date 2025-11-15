@@ -22,6 +22,17 @@ class ShopController extends Controller
      */
     public function index(Request $request)
     {
+        $currentShop = $request->get('current_shop');
+        
+        // If it's a sub shop, return only that shop
+        if ($currentShop && !$currentShop->isRootShop()) {
+            return $this->json('shop', [
+                'total' => 1,
+                'shops' => [ShopResource::make($currentShop)],
+            ]);
+        }
+
+        // Root shop: return all shops
         $page = $request->page;
         $perPage = $request->per_page;
         $skip = ($page * $perPage) - $perPage;
@@ -49,8 +60,24 @@ class ShopController extends Controller
      * @param  Shop  $shop  The shop instance
      * @return mixed
      */
-    public function show(Shop $shop)
+    public function show(Request $request, Shop $shop = null)
     {
+        $currentShop = $request->get('current_shop');
+        
+        // If it's a sub shop, return only that shop
+        if ($currentShop && !$currentShop->isRootShop()) {
+            return $this->json('shop details', [
+                'shop' => ShopDetailsResource::make($currentShop),
+            ]);
+        }
+
+        // Root shop: return requested shop or current shop
+        $shop = $shop ?? $currentShop;
+        
+        if (!$shop) {
+            return $this->json('shop not found', [], 404);
+        }
+
         return $this->json('shop details', [
             'shop' => ShopDetailsResource::make($shop),
         ]);
@@ -61,6 +88,13 @@ class ShopController extends Controller
      */
     public function shopCategory(Request $request)
     {
+        if ($request->filled('shop_id')) {
+            $resolvedId = $this->resolveShopId($request->shop_id);
+            if ($resolvedId) {
+                $request->merge(['shop_id' => $resolvedId]);
+            }
+        }
+
         $request->validate([
             'shop_id' => 'required|exists:shops,id',
         ]);
@@ -83,6 +117,22 @@ class ShopController extends Controller
             'total' => $total,
             'categories' => CategoryResource::collection($categories),
         ]);
+    }
+
+    /**
+     * Resolve shop identifier (id or slug) to numeric id.
+     */
+    private function resolveShopId($identifier): ?int
+    {
+        if (blank($identifier)) {
+            return null;
+        }
+
+        if (is_numeric($identifier) && Shop::whereKey($identifier)->exists()) {
+            return (int) $identifier;
+        }
+
+        return Shop::where('slug', $identifier)->value('id');
     }
 
     /**

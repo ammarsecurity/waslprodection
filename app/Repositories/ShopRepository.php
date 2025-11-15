@@ -42,8 +42,16 @@ class ShopRepository extends Repository
             $banner = MediaRepository::storeByRequest($request->shop_banner, 'shops/banner', 'image');
         }
 
+        // Generate slug if not provided
+        $slug = $request->slug ?? Shop::generateSlug($request->shop_name);
+
+        $isRoot = $request->boolean('is_root_shop');
+        if ($isRoot) {
+            Shop::where('is_root_shop', true)->update(['is_root_shop' => false]);
+        }
+        
         // create new shop and return
-        return self::create([
+        $data = [
             'user_id' => $user->id,
             'name' => $request->shop_name,
             'logo_id' => $thumbnail ? $thumbnail->id : null,
@@ -52,7 +60,19 @@ class ShopRepository extends Repository
             'address' => $request->address,
             'description' => $request->description,
             'status' => true,
-        ]);
+            'slug' => $slug,
+            'is_root_shop' => $isRoot,
+        ];
+
+        if ($isRoot) {
+            $data['subdomain'] = null;
+            $data['custom_domain'] = null;
+        } else {
+            $data['subdomain'] = $request->subdomain;
+            $data['custom_domain'] = $request->custom_domain;
+        }
+
+        return self::create($data);
     }
 
     /**
@@ -70,7 +90,15 @@ class ShopRepository extends Repository
         $banner = self::updateBanner($shop, $request);
 
 
-        $shop->update([
+        // Generate slug if not provided and shop name changed
+        $slug = $request->slug;
+        if (!$slug && $request->shop_name !== $shop->name) {
+            $slug = Shop::generateSlug($request->shop_name);
+        } elseif (!$slug) {
+            $slug = $shop->slug;
+        }
+        
+        $updateData = [
             'name' => $request->shop_name,
             'logo_id' => $thumbnail ? $thumbnail->id : $shop->logo_id,
             'banner_id' => $banner ? $banner->id : $shop->banner_id,
@@ -83,7 +111,30 @@ class ShopRepository extends Repository
             'closing_time' => $request->closing_time ?? $shop->closing_time,
             'estimated_delivery_time' => $request->estimated_delivery_time ?? $shop->estimated_delivery_time,
             'chat_id' => $request->chat_id ?? $shop->chat_id,
-        ]);
+            'slug' => $slug,
+        ];
+        
+        $isRoot = $request->boolean('is_root_shop', $shop->is_root_shop);
+        if ($isRoot) {
+            Shop::where('is_root_shop', true)
+                ->where('id', '!=', $shop->id)
+                ->update(['is_root_shop' => false]);
+            $shop->is_root_shop = true;
+        } else {
+            $shop->is_root_shop = false;
+        }
+        $updateData['is_root_shop'] = $shop->is_root_shop;
+
+        // Only update subdomain and custom_domain if resulting shop is not root
+        if (!$updateData['is_root_shop']) {
+            $updateData['subdomain'] = $request->subdomain ?? $shop->subdomain;
+            $updateData['custom_domain'] = $request->custom_domain ?? $shop->custom_domain;
+        } else {
+            $updateData['subdomain'] = null;
+            $updateData['custom_domain'] = null;
+        }
+        
+        $shop->update($updateData);
         $user = UserRepository::updateByRequest($request, $shop->user);
         return $shop;
     }
@@ -119,6 +170,14 @@ class ShopRepository extends Repository
         // shop banner
         $banner = self::updateBanner($shop, $request);
 
+        // determine slug
+        $slug = $request->slug;
+        if (!$slug && $request->shop_name !== $shop->name) {
+            $slug = Shop::generateSlug($request->shop_name);
+        } elseif (!$slug) {
+            $slug = $shop->slug;
+        }
+
         // update shop
         $updateData = [
             'name' => $request->shop_name,
@@ -127,7 +186,28 @@ class ShopRepository extends Repository
             'address' => $request->address ?? $shop->address,
             'description' => $request->description ?? $shop->description,
             'chat_id' => $request->chat_id ?? $shop->chat_id,
+            'slug' => $slug,
         ];
+        
+        $isRoot = $request->boolean('is_root_shop', $shop->is_root_shop);
+        if ($isRoot) {
+            Shop::where('is_root_shop', true)
+                ->where('id', '!=', $shop->id)
+                ->update(['is_root_shop' => false]);
+            $shop->is_root_shop = true;
+        } else {
+            $shop->is_root_shop = false;
+        }
+        $updateData['is_root_shop'] = $shop->is_root_shop;
+
+        // Only update subdomain and custom_domain if resulting shop is not root
+        if (!$updateData['is_root_shop']) {
+            $updateData['subdomain'] = $request->subdomain ?? $shop->subdomain;
+            $updateData['custom_domain'] = $request->custom_domain ?? $shop->custom_domain;
+        } else {
+            $updateData['subdomain'] = null;
+            $updateData['custom_domain'] = null;
+        }
         
         $shop->update($updateData);
 

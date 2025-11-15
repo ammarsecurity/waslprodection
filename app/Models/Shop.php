@@ -33,7 +33,11 @@ class Shop extends Model
         'estimated_delivery_time',
         'chat_id',
         'status',
-        'user_id'
+        'user_id',
+        'slug',
+        'subdomain',
+        'custom_domain',
+        'is_root_shop'
     ];
 
 
@@ -259,5 +263,100 @@ public function banner(): Attribute
         return new Attribute(
             get: fn () => (float) number_format($avgRating > 0 ? $avgRating : 5, 1, '.', ''),
         );
+    }
+
+    /**
+     * Scope a query to only include shops by slug.
+     *
+     * @param  Builder  $query
+     * @param  string  $slug
+     * @return Builder
+     */
+    public function scopeBySlug(Builder $query, string $slug): Builder
+    {
+        return $query->where('slug', $slug);
+    }
+
+    /**
+     * Scope a query to only include shops by subdomain.
+     *
+     * @param  Builder  $query
+     * @param  string  $subdomain
+     * @return Builder
+     */
+    public function scopeBySubdomain(Builder $query, string $subdomain): Builder
+    {
+        return $query->where('subdomain', $subdomain);
+    }
+
+    /**
+     * Scope a query to only include shops by custom domain.
+     *
+     * @param  Builder  $query
+     * @param  string  $domain
+     * @return Builder
+     */
+    public function scopeByCustomDomain(Builder $query, string $domain): Builder
+    {
+        return $query->where('custom_domain', $domain);
+    }
+
+    /**
+     * Scope a query to only include root shop.
+     *
+     * @param  Builder  $query
+     * @return Builder
+     */
+    public function scopeRootShop(Builder $query): Builder
+    {
+        return $query->where('is_root_shop', true);
+    }
+
+    /**
+     * Check if this shop is the root shop.
+     *
+     * @return bool
+     */
+    public function isRootShop(): bool
+    {
+        return (bool) $this->is_root_shop;
+    }
+
+    /**
+     * Get the domain for this shop (subdomain or custom_domain).
+     *
+     * @return string|null
+     */
+    public function getDomain(): ?string
+    {
+        if ($this->custom_domain) {
+            return $this->custom_domain;
+        }
+
+        if ($this->subdomain) {
+            return $this->subdomain;
+        }
+
+        return null;
+    }
+
+    /**
+     * Generate a slug from the shop name.
+     *
+     * @param  string  $name
+     * @return string
+     */
+    public static function generateSlug(string $name): string
+    {
+        $slug = \Illuminate\Support\Str::slug($name);
+        $originalSlug = $slug;
+        $counter = 1;
+
+        while (static::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
     }
 }

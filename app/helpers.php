@@ -68,6 +68,16 @@ if (! function_exists('generaleSetting')) {
         }
 
         if ($type == 'shop') {
+            // First, try to get shop from request (set by IdentifyShopFromDomainMiddleware)
+            $request = request();
+            if ($request && $request->has('current_shop')) {
+                $shop = $request->get('current_shop');
+                if ($shop) {
+                    return $shop;
+                }
+            }
+
+            // Fallback to old logic
             if ($generaleSetting?->shop_type == 'single') {
                 $shop = User::role('root')->whereHas('shop')->first()?->shop;
             } else {
@@ -204,5 +214,18 @@ if (! function_exists('daysToLargestUnit')) {
         }
 
         return $days . ' day' . ($days > 1 ? 's' : '');
+    }
+}
+
+if (! function_exists('isRootShop')) {
+    /**
+     * Check if the current shop is root shop.
+     *
+     * @return bool
+     */
+    function isRootShop(): bool
+    {
+        $shop = generaleSetting('shop');
+        return $shop && $shop->isRootShop();
     }
 }

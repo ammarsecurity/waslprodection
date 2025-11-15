@@ -8,6 +8,21 @@
                     
                     <!-- Enhanced Logo Section with 3D Effects -->
                     <div class="logo-section">
+                        <!-- Shop Logo First -->
+                        <div v-if="master.shopLogo" class="shop-logo-wrapper">
+                            <div class="shop-logo-container">
+                                <div class="shop-logo-ring"></div>
+                                <img :src="master.shopLogo" alt="Shop Logo" class="shop-logo" />
+                                <div class="pulse-ring"></div>
+                                <div class="shop-badge">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Main Logo Second (Smaller) -->
                         <router-link to="/" class="logo-link">
                             <div class="logo-container">
                                 <div class="logo-backdrop"></div>
@@ -16,22 +31,6 @@
                                 <div class="logo-glow"></div>
                             </div>
                         </router-link>
-                        
-                        <div v-if="master.shopLogo" class="shop-logo-wrapper">
-                            <div class="divider-line">
-                                <div class="divider-dot"></div>
-                            </div>
-                            <div class="shop-logo-container">
-                                <div class="shop-logo-ring"></div>
-                                <img :src="master.shopLogo" alt="Shop Logo" class="shop-logo" />
-                                <div class="pulse-ring"></div>
-                                <div class="shop-badge">
-                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Desktop Navigation with Modern Effects -->
@@ -365,19 +364,32 @@ onMounted(() => {
 .logo-section {
     display: flex;
     align-items: center;
-    gap: 1.75rem;
+    gap: 0.5rem;
+}
+
+@media (min-width: 768px) {
+    .logo-section {
+        gap: 0.75rem;
+    }
 }
 
 .logo-container {
     position: relative;
-    padding: 10px;
-    border-radius: 20px;
+    padding: 6px;
+    border-radius: 12px;
     background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(255,255,255,0.3));
     box-shadow: 
-        0 4px 15px rgba(var(--primary-rgb), 0.08),
-        inset 0 1px 3px rgba(255,255,255,0.5);
+        0 3px 12px rgba(var(--primary-rgb), 0.08),
+        inset 0 1px 2px rgba(255,255,255,0.5);
     overflow: hidden;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@media (min-width: 768px) {
+    .logo-container {
+        padding: 8px;
+        border-radius: 16px;
+    }
 }
 
 .logo-backdrop {
@@ -396,12 +408,18 @@ onMounted(() => {
 }
 
 .main-logo {
-    height: 48px;
+    height: 32px;
     width: auto;
     position: relative;
     z-index: 3;
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+@media (min-width: 768px) {
+    .main-logo {
+        height: 36px;
+    }
 }
 
 .logo-container:hover .main-logo {
@@ -452,12 +470,11 @@ onMounted(() => {
 .shop-logo-wrapper {
     display: flex;
     align-items: center;
-    gap: 1.75rem;
 }
 
 .divider-line {
     width: 1px;
-    height: 40px;
+    height: 28px;
     background: linear-gradient(
         to bottom,
         transparent,
@@ -466,6 +483,14 @@ onMounted(() => {
         transparent
     );
     position: relative;
+    margin: 0 0.4rem;
+}
+
+@media (min-width: 768px) {
+    .divider-line {
+        height: 32px;
+        margin: 0 0.5rem;
+    }
 }
 
 .divider-dot {
@@ -487,19 +512,83 @@ onMounted(() => {
 
 .shop-logo-container {
     position: relative;
+    padding: 3px;
+    background: linear-gradient(135deg, 
+        rgba(var(--primary-rgb), 0.15),
+        rgba(var(--primary-rgb), 0.05),
+        rgba(var(--primary-rgb), 0.15)
+    );
+    border-radius: 20px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@media (min-width: 768px) {
+    .shop-logo-container {
+        padding: 6px;
+        border-radius: 28px;
+    }
+}
+
+.shop-logo-container::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 24px;
+    background: linear-gradient(45deg, 
+        rgba(var(--primary-rgb), 0.4),
+        rgba(139, 92, 246, 0.4),
+        rgba(var(--primary-rgb), 0.4)
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+    filter: blur(8px);
+}
+
+@media (min-width: 768px) {
+    .shop-logo-container::before {
+        inset: -3px;
+        border-radius: 32px;
+        filter: blur(10px);
+    }
+}
+
+.shop-logo-container:hover::before {
+    opacity: 1;
+    animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
 }
 
 .shop-logo-ring {
     position: absolute;
-    inset: -4px;
-    border-radius: 20px;
-    background: linear-gradient(45deg, 
-        rgba(var(--primary-rgb), 0.3),
-        rgba(var(--primary-rgb), 0.1),
-        rgba(var(--primary-rgb), 0.3)
+    inset: -5px;
+    border-radius: 24px;
+    background: conic-gradient(
+        from 0deg,
+        rgba(var(--primary-rgb), 0.4),
+        rgba(139, 92, 246, 0.4),
+        rgba(236, 72, 153, 0.4),
+        rgba(var(--primary-rgb), 0.4)
     );
-    animation: rotateGradient 3s linear infinite;
+    animation: rotateGradient 4s linear infinite;
     z-index: 0;
+    opacity: 0.8;
+}
+
+@media (min-width: 768px) {
+    .shop-logo-ring {
+        inset: -8px;
+        border-radius: 32px;
+    }
+}
+
+.shop-logo-container:hover .shop-logo-ring {
+    animation: rotateGradient 2s linear infinite;
+    opacity: 1;
 }
 
 @keyframes rotateGradient {
@@ -508,55 +597,160 @@ onMounted(() => {
 }
 
 .shop-logo {
-    width: 52px;
-    height: 52px;
+    width: 48px;
+    height: 48px;
     border-radius: 18px;
     object-fit: cover;
     position: relative;
     z-index: 2;
     border: 3px solid white;
     box-shadow: 
-        0 4px 12px rgba(0, 0, 0, 0.1),
-        0 0 0 1px rgba(var(--primary-rgb), 0.1);
+        0 6px 20px rgba(0, 0, 0, 0.15),
+        0 0 0 2px rgba(var(--primary-rgb), 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.1);
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: white;
 }
 
-.shop-logo:hover {
-    transform: scale(1.15) rotate(-5deg);
+@media (min-width: 768px) {
+    .shop-logo {
+        width: 72px;
+        height: 72px;
+        border-radius: 24px;
+        border-width: 5px;
+    }
+}
+
+.shop-logo-container:hover .shop-logo {
+    transform: scale(1.2) rotate(-8deg) translateY(-2px);
     box-shadow: 
-        0 8px 24px rgba(var(--primary-rgb), 0.2),
-        0 0 0 2px rgba(var(--primary-rgb), 0.2);
+        0 12px 32px rgba(var(--primary-rgb), 0.3),
+        0 0 0 3px rgba(var(--primary-rgb), 0.3),
+        inset 0 2px 6px rgba(255, 255, 255, 0.4),
+        inset 0 -2px 6px rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.95);
+}
+
+.shop-logo-container::after {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    border-radius: 28px;
+    background: radial-gradient(
+        circle at center,
+        rgba(var(--primary-rgb), 0.2) 0%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+    pointer-events: none;
+}
+
+@media (min-width: 768px) {
+    .shop-logo-container::after {
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        border-radius: 36px;
+    }
+}
+
+.shop-logo-container:hover::after {
+    opacity: 1;
+    animation: radialPulse 2s ease-in-out infinite;
+}
+
+@keyframes radialPulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.8; }
 }
 
 .shop-badge {
     position: absolute;
-    bottom: -2px;
-    right: -2px;
+    bottom: -4px;
+    right: -4px;
     width: 20px;
     height: 20px;
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     border: 2px solid white;
-    z-index: 3;
+    z-index: 4;
+    box-shadow: 
+        0 4px 12px rgba(251, 191, 36, 0.4),
+        0 0 0 2px rgba(var(--primary-rgb), 0.1),
+        inset 0 1px 2px rgba(255, 255, 255, 0.3);
     animation: badgeBounce 2s infinite;
+    transition: all 0.3s ease;
+}
+
+@media (min-width: 768px) {
+    .shop-badge {
+        bottom: -6px;
+        right: -6px;
+        width: 28px;
+        height: 28px;
+        border-width: 4px;
+    }
+}
+
+.shop-badge svg {
+    width: 10px;
+    height: 10px;
+}
+
+@media (min-width: 768px) {
+    .shop-badge svg {
+        width: 16px;
+        height: 16px;
+    }
+}
+
+.shop-logo-container:hover .shop-badge {
+    transform: scale(1.15) rotate(15deg);
+    box-shadow: 
+        0 6px 16px rgba(251, 191, 36, 0.5),
+        0 0 0 3px rgba(var(--primary-rgb), 0.2),
+        inset 0 1px 3px rgba(255, 255, 255, 0.4);
 }
 
 @keyframes badgeBounce {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.1) rotate(-5deg); }
+    50% { transform: scale(1.15) rotate(0deg); }
+    75% { transform: scale(1.1) rotate(5deg); }
 }
 
 .pulse-ring {
     position: absolute;
-    inset: -4px;
-    border-radius: 20px;
-    border: 2px solid rgba(var(--primary-rgb), 0.3);
+    inset: -5px;
+    border-radius: 24px;
+    border: 2px solid rgba(var(--primary-rgb), 0.4);
     animation: pulse 2s infinite;
     pointer-events: none;
+    z-index: 1;
+}
+
+@media (min-width: 768px) {
+    .pulse-ring {
+        inset: -8px;
+        border-radius: 32px;
+        border-width: 3px;
+    }
+}
+
+.shop-logo-container:hover .pulse-ring {
+    border-color: rgba(var(--primary-rgb), 0.6);
+    animation: pulse 1.5s infinite;
 }
 
 @keyframes pulse {
@@ -1001,15 +1195,6 @@ onMounted(() => {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-    .main-logo {
-        height: 40px;
-    }
-    
-    .shop-logo {
-        width: 44px;
-        height: 44px;
-    }
-    
     .action-btn {
         padding: 0.75rem 1.25rem;
         gap: 0.5rem;

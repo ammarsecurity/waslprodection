@@ -102,6 +102,7 @@ Route::name('admin.')->group(function () {
             Route::get('/shops/{shop}/edit', 'edit')->name('shop.edit');
             Route::post('/shops/{shop}/update', 'update')->name('shop.update');
             Route::get('/shops/{shop}', 'show')->name('shop.show');
+            Route::delete('/shops/{shop}/destroy', 'destroy')->name('shop.destroy');
             Route::get('/shops/{shop}/status-toggle', 'statusToggle')->name('shop.status.toggle');
             Route::get('/shops/{shop}/orders', 'orders')->name('shop.orders');
             Route::get('/shops/{shop}/products', 'products')->name('shop.products');

@@ -24,8 +24,8 @@ class ShopUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $user = null;
-        $required = 'required';
+        $shop = $this->route('shop');
+        $shopId = $shop ? $shop->id : null;
         
         // validation rules
         return [
@@ -35,6 +35,34 @@ class ShopUpdateRequest extends FormRequest
             'shop_banner' => ['nullable', 'image', 'mimes:jpg,png,jpeg,gif', 'max:2048'],
             'description' => ['nullable', 'string', 'max:200'],
             'chat_id' => ['nullable', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255', 'regex:/^[a-z0-9-]+$/', 'unique:shops,slug,' . $shopId],
+            'subdomain' => [
+                'nullable',
+                'string',
+                'max:255',
+                'regex:/^[a-z0-9-]+$/',
+                'unique:shops,subdomain,' . $shopId,
+                function ($attribute, $value, $fail) use ($shop) {
+                    // If shop is root shop, subdomain should be null
+                    if ($shop && $shop->is_root_shop && $value) {
+                        $fail(__('Root shop cannot have a subdomain.'));
+                    }
+                },
+            ],
+            'custom_domain' => [
+                'nullable',
+                'string',
+                'max:255',
+                'regex:/^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i',
+                'unique:shops,custom_domain,' . $shopId,
+                function ($attribute, $value, $fail) use ($shop) {
+                    // If shop is root shop, custom_domain should be null
+                    if ($shop && $shop->is_root_shop && $value) {
+                        $fail(__('Root shop cannot have a custom domain.'));
+                    }
+                },
+            ],
+            'is_root_shop' => ['nullable', 'boolean'],
         ];
     }
 

@@ -44,6 +44,7 @@ class Kernel extends HttpKernel
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            'normalizeShopIdentifiers',
         ],
     ];
 
@@ -73,5 +74,7 @@ class Kernel extends HttpKernel
         'checkPermission' => \App\Http\Middleware\CheckPermission::class,
         'demoMode' => \App\Http\Middleware\DemoModeMiddleware::class,
         'chack_root_user' => \App\Http\Middleware\CheckHasRootUser::class,
+        'identifyShop' => \App\Http\Middleware\IdentifyShopFromDomainMiddleware::class,
+        'normalizeShopIdentifiers' => \App\Http\Middleware\NormalizeShopIdentifiers::class,
     ];
 }

@@ -107,6 +107,20 @@ class MasterController extends Controller
         // footer
         $footers = Footer::with('items')->OrderBy('order')->get();
 
+        // Get current shop info
+        $currentShop = request()->get('current_shop');
+        $shopInfo = null;
+        if ($currentShop) {
+            $shopInfo = [
+                'id' => $currentShop->id,
+                'name' => $currentShop->name,
+                'slug' => $currentShop->slug,
+                'subdomain' => $currentShop->subdomain,
+                'custom_domain' => $currentShop->custom_domain,
+                'is_root_shop' => $currentShop->isRootShop(),
+            ];
+        }
+
         return $this->json('Master data', [
             'currency' => [
                 'name' => $defaultCurrency?->name ?? 'USD',
@@ -149,6 +163,7 @@ class MasterController extends Controller
             'social_auths' => $socialAuths,
             'menus' => MenuResource::collection($menus),
             'footers' => FooterResource::collection($footers),
+            'current_shop' => $shopInfo,
         ]);
     }
 }

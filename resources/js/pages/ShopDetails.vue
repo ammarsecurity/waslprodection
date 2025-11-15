@@ -940,28 +940,108 @@ const showChat = async () => {
 .shop-card-wrapper {
     position: relative;
     z-index: 10;
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .shop-card {
-    background: white;
-    border-radius: 16px;
-    padding: 1.5rem;
+    background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+    border-radius: 24px;
+    padding: 1.75rem;
     box-shadow: 
-        0 4px 12px rgba(0, 0, 0, 0.06),
-        0 2px 6px rgba(0, 0, 0, 0.04);
+        0 8px 24px rgba(0, 0, 0, 0.08),
+        0 4px 12px rgba(0, 0, 0, 0.04),
+        0 0 0 1px rgba(59, 130, 246, 0.05);
     position: relative;
     overflow: hidden;
-    border: 1px solid #f0f0f0;
+    border: 1px solid rgba(59, 130, 246, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+}
+
+.shop-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, 
+        rgba(59, 130, 246, 0.8) 0%, 
+        rgba(139, 92, 246, 0.8) 50%, 
+        rgba(59, 130, 246, 0.8) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.shop-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 
+        0 12px 32px rgba(0, 0, 0, 0.12),
+        0 6px 16px rgba(0, 0, 0, 0.08),
+        0 0 0 1px rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+.shop-card:hover::before {
+    opacity: 1;
 }
 
 @media (min-width: 768px) {
     .shop-card {
-        padding: 2rem;
+        padding: 2.5rem;
+        border-radius: 28px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .shop-card {
+        padding: 3rem;
     }
 }
 
 .card-glow {
-    display: none;
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+        circle,
+        rgba(59, 130, 246, 0.1) 0%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.shop-card:hover .card-glow {
+    opacity: 1;
+    animation: pulseGlow 2s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+    0%, 100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.1);
+    }
 }
 
 /* Shop Header */
@@ -969,6 +1049,8 @@ const showChat = async () => {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    position: relative;
+    z-index: 1;
 }
 
 @media (min-width: 768px) {
@@ -1198,15 +1280,67 @@ const showChat = async () => {
 }
 
 .shop-description {
-    color: #6b7280;
+    color: #4b5563;
     font-size: 14px;
-    line-height: 1.6;
+    line-height: 1.7;
     max-width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(249, 250, 251, 0.8) 0%, rgba(243, 244, 246, 0.6) 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(229, 231, 235, 0.5);
+    transition: all 0.3s ease;
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.shop-description::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(180deg, 
+        rgba(59, 130, 246, 0.8) 0%, 
+        rgba(139, 92, 246, 0.8) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.shop-description:hover {
+    background: linear-gradient(135deg, rgba(249, 250, 251, 1) 0%, rgba(243, 244, 246, 0.9) 100%);
+    border-color: rgba(59, 130, 246, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transform: translateX(2px);
+}
+
+.shop-description:hover::before {
+    opacity: 1;
+}
+
+.shop-description :deep(p),
+.shop-description :deep(div),
+.shop-description :deep(span) {
+    margin: 0;
+    color: inherit;
 }
 
 @media (min-width: 768px) {
     .shop-description {
         font-size: 15px;
+        padding: 1.25rem;
+        border-radius: 14px;
+        max-width: none;
+        flex: 1;
+    }
+}
+
+@media (min-width: 1024px) {
+    .shop-description {
+        font-size: 15px;
+        padding: 1.5rem;
+        border-radius: 16px;
         max-width: 700px;
     }
 }
@@ -1215,18 +1349,29 @@ const showChat = async () => {
 .stats-section {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 1rem;
     width: 100%;
-    margin-top: 1rem;
+    margin-top: 1.5rem;
+    position: relative;
+    z-index: 1;
 }
 
 @media (min-width: 768px) {
     .stats-section {
         flex-direction: row;
-        gap: 1rem;
+        gap: 1.5rem;
+        align-items: flex-start;
+        justify-content: space-between;
+        width: 100%;
+        margin-top: 1rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .stats-section {
+        gap: 2rem;
         align-items: center;
-        width: auto;
-        margin-top: 0;
+        justify-content: space-between;
     }
 }
 
@@ -1326,38 +1471,71 @@ const showChat = async () => {
 /* Chat Button */
 .chat-button {
     position: relative;
-    padding: 12px 20px;
-    border-radius: 10px;
-    background: #3b82f6;
+    padding: 14px 24px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    transition: all 0.2s ease;
+    gap: 10px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
     width: 100%;
     cursor: pointer;
     color: white;
     font-weight: 600;
+    font-size: 15px;
+    box-shadow: 
+        0 4px 12px rgba(59, 130, 246, 0.3),
+        0 2px 6px rgba(59, 130, 246, 0.2);
 }
 
 @media (min-width: 768px) {
     .chat-button {
         width: auto;
-        min-width: 160px;
+        min-width: 180px;
+        padding: 16px 28px;
+        border-radius: 14px;
     }
 }
 
+.chat-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.2), 
+        transparent);
+    transition: left 0.5s ease;
+}
+
+.chat-button:hover::before {
+    left: 100%;
+}
+
 .chat-bg {
-    display: none;
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+}
+
+.chat-button:hover .chat-bg {
+    opacity: 1;
 }
 
 .chat-content {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     z-index: 2;
 }
 
@@ -1366,33 +1544,78 @@ const showChat = async () => {
     color: white;
     display: flex;
     align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    transition: transform 0.3s ease;
+}
+
+.chat-icon-wrapper img {
+    filter: brightness(0) invert(1);
+    width: 24px;
+    height: 24px;
+}
+
+.chat-button:hover .chat-icon-wrapper {
+    transform: scale(1.1) rotate(5deg);
 }
 
 .chat-pulse {
-    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    animation: pulseRing 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    pointer-events: none;
+}
+
+@keyframes pulseRing {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
 }
 
 .chat-text {
     font-weight: 600;
     color: white;
+    font-size: 15px;
+    letter-spacing: 0.3px;
 }
 
 .chat-button:hover {
-    background: #2563eb;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-2px);
+    box-shadow: 
+        0 6px 20px rgba(59, 130, 246, 0.4),
+        0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .chat-button:active {
-    background: #1d4ed8;
+    transform: translateY(0);
+    box-shadow: 
+        0 2px 8px rgba(59, 130, 246, 0.3),
+        0 1px 4px rgba(59, 130, 246, 0.2);
 }
 
 /* Navigation Tabs - Mobile Optimized */
 .nav-section {
     margin-top: 1.5rem;
     padding-top: 1.5rem;
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid rgba(229, 231, 235, 0.8);
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    position: relative;
+    z-index: 1;
 }
 
 @media (min-width: 768px) {

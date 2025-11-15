@@ -100,12 +100,61 @@
                         {{ __('Shop Information') }}
                     </h5>
                 </div>
+                @php
+                    $appHost = parse_url(config('app.url'), PHP_URL_HOST) ?? request()->getHost();
+                    $appHost = preg_replace('/^www\./', '', $appHost);
+                @endphp
                 <div class="row mt-3">
                     <div class="col-md-6">
                         <x-input type="text" name="shop_name" label="{{ __('Shop Name') }}" placeholder="{{ __('Enter Shop Name') }}" required />
                     </div>
                     <div class="col-md-6">
                         <x-input type="text" name="address" label="{{ __('Address') }}" placeholder="{{ __('Enter Address') }}" />
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <x-input type="text" name="slug" label="{{ __('Shop Slug') }}" placeholder="{{ __('auto-generated if empty') }}" value="{{ old('slug') }}" />
+                        <small class="form-text text-muted">
+                            {{ __('Used to build internal links (e.g. /shops/slug). Lowercase letters, numbers and dashes only.') }}
+                        </small>
+                    </div>
+                    <div class="col-md-4 mt-3 mt-md-0">
+                        <x-input type="text" name="subdomain" label="{{ __('Subdomain') }}" placeholder="{{ __('example') }}" value="{{ old('subdomain') }}" class="domain-dependent" />
+                        <small class="form-text text-muted">
+                            {{ __('A URL of the form') }} https://{{ __('subdomain') }}.{{ $appHost }}
+                        </small>
+                    </div>
+                    <div class="col-md-4 mt-3 mt-md-0">
+                        <x-input type="text" name="custom_domain" label="{{ __('Custom Domain') }}" placeholder="{{ __('shop.example.com') }}" value="{{ old('custom_domain') }}" class="domain-dependent" />
+                        <small class="form-text text-muted">
+                            {{ __('Enter a full domain that already points (DNS + SSL) to this shop.') }}
+                            <a class="ms-1" data-bs-toggle="collapse" href="#customDomainHelpCreate" role="button" aria-expanded="false" aria-controls="customDomainHelpCreate">
+                                {{ __('Show details') }}
+                            </a>
+                        </small>
+                        <div class="collapse mt-2" id="customDomainHelpCreate">
+                            <div class="small text-muted border rounded p-2">
+                                <ol class="mb-1">
+                                    <li>{{ __('Add an A/ALIAS record that points your domain to this server IP.') }}</li>
+                                    <li>{{ __('Configure an SSL certificate for the domain (Let\'s Encrypt or other).') }}</li>
+                                    <li>{{ __('After DNS propagation, enter the domain here and save the shop.') }}</li>
+                                </ol>
+                                <span class="fw-semibold">{{ __('Note: DNS propagation may take a few minutes to hours.') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <input type="hidden" name="is_root_shop" value="0">
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" role="switch" id="isRootShop" name="is_root_shop" value="1" {{ old('is_root_shop') ? 'checked' : '' }}>
+                            <label class="form-check-label fw-semibold" for="isRootShop">{{ __('Set as Root Shop') }}</label>
+                        </div>
+                        <small class="form-text text-muted">
+                            {{ __('This shop will act as the main marketplace domain. Only one shop can be root at a time.') }}
+                        </small>
                     </div>
                 </div>
 
@@ -176,6 +225,18 @@
         // Initialize character count on page load
         document.addEventListener('DOMContentLoaded', function() {
             checkDescription();
+            const rootToggle = document.getElementById('isRootShop');
+            const domainInputs = document.querySelectorAll('.domain-dependent');
+
+            const toggleDomainInputs = () => {
+                const disabled = rootToggle.checked;
+                domainInputs.forEach(input => input.disabled = disabled);
+            };
+
+            if (rootToggle) {
+                rootToggle.addEventListener('change', toggleDomainInputs);
+                toggleDomainInputs();
+            }
         });
     </script>
 @endpush
